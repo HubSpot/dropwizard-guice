@@ -1,6 +1,5 @@
 package com.hubspot.dropwizard.guice;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,23 +26,46 @@ public class GuiceBundle implements ConfiguredBundle<Configuration> {
 
 	final Logger logger = LoggerFactory.getLogger(GuiceBundle.class);
 
-	private AutoConfig autoConfig = null;
-	private List<Module> modules = Lists.newArrayList();
+	private final AutoConfig autoConfig;
+	private final List<Module> modules;
+	
+	public static class Builder {
+		private AutoConfig autoConfig;
+		private List<Module> modules = Lists.newArrayList();
+		
+		public Builder addModule(Module module) {
+			Preconditions.checkNotNull(module);
+			modules.add(module);
+			return this;
+		}
 
+		public Builder enableAutoConfig(String... basePackages) {
+			Preconditions.checkNotNull(basePackages.length > 0);
+			Preconditions.checkArgument(autoConfig == null, "autoConfig already enabled!");
+			autoConfig = new AutoConfig(basePackages);
+			return this;
+		}
+		
+		public GuiceBundle build() {
+			return new GuiceBundle(autoConfig, modules);
+		}
+
+	}
+	
+	public static Builder newBuilder() {
+		return new Builder();
+	}
+
+	private GuiceBundle(AutoConfig autoConfig, List<Module> modules) {
+		Preconditions.checkNotNull(modules);
+		Preconditions.checkArgument(!modules.isEmpty());
+		this.modules = modules;
+		this.autoConfig = autoConfig;
+	}
+	
 	@Override
 	public void initialize(Bootstrap<?> bootstrap) {
 
-	}
-
-	public GuiceBundle addModule(Module module) {
-		Preconditions.checkNotNull(module);
-		modules.add(module);
-		return this;
-	}
-	
-	public GuiceBundle enableAutoConfig(String... basePackages) {
-		autoConfig = new AutoConfig(basePackages);
-		return this;
 	}
 
 	@Override
@@ -57,12 +79,9 @@ public class GuiceBundle implements ConfiguredBundle<Configuration> {
 			};
 		};
 		environment.setJerseyServletContainer(container);
-		environment.addFilter(GuiceFilter.class, configuration
-				.getHttpConfiguration().getRootPath());
+		environment.addFilter(GuiceFilter.class, configuration.getHttpConfiguration().getRootPath());
 
-		Collection<Module> modules = Lists.newArrayList();
-		modules.add(Modules.override(new JerseyServletModule()).with(
-				new JerseyContainerModule(container)));
+		modules.add(Modules.override(new JerseyServletModule()).with(new JerseyContainerModule(container)));
 		modules.add(new AbstractModule() {
 
 			@Override
@@ -70,7 +89,6 @@ public class GuiceBundle implements ConfiguredBundle<Configuration> {
 				binder().bind(Configuration.class).toInstance(configuration);
 			}
 		});
-		modules.addAll(modules);
 		Injector injector = Guice.createInjector(modules);
 		if (autoConfig != null) {
 			autoConfig.run(environment, injector);
