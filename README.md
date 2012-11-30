@@ -40,7 +40,7 @@ public class HelloWorldService extends Service<HelloWorldConfiguration> {
 
 	@Override
 	public void run(HelloWorldConfiguration configuration, final Environment environment) {
-    environment.addResource(HelloWorldResource.class);
+		environment.addResource(HelloWorldResource.class);
 		environment.addResource(TemplateHealthCheck.class);
 	}
 
@@ -49,5 +49,7 @@ public class HelloWorldService extends Service<HelloWorldConfiguration> {
 
 Lastly, you can pass one or more base packages to the GuiceBundle subclass constructor
 to enable auto configuration via package scanning.
+
+Please fork [an example project](https://github.com/HubSpot/dropwizard-guice) if you'd like to get going right away. 
 
 Enjoy!
