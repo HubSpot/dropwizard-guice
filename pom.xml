@@ -3,16 +3,46 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
 	<groupId>com.hubspot.dropwizard</groupId>
 	<artifactId>dropwizard-guice</artifactId>
 	<version>0.6.2-SNAPSHOT</version>
 	<name>Dropwizard Guice Support</name>
+	<description>Simple library for using Guice DI in a dropwizard service.</description>
+	<url>https://github.com/HubSpot/dropwizard-guice</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git@github.com:HubSpot/dropwizard-guice.git</connection>
+		<developerConnection>scm:git:git@github.com:HubSpot/dropwizard-guice.git</developerConnection>
+		<url>git@github.com:HubSpot/dropwizard-guice.git</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>eliast</id>
+			<name>Elias Torres</name>
+			<email>elias@hubspot.com</email>
+		</developer>
+	</developers>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.yammer.dropwizard</groupId>
 			<artifactId>dropwizard-core</artifactId>
-			<version>0.6.1</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
@@ -48,6 +78,20 @@
 					<target>1.6</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
