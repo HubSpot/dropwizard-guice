@@ -8,7 +8,7 @@ the dropwizard environment upon service start.
 ### Usage
 
 Simply install a new instance of the bundle during your service initialization
-```
+```java
 public class HelloWorldService extends Service<HelloWorldConfiguration> {
 
   public static void main(String[] args) throws Exception {
@@ -34,7 +34,7 @@ public class HelloWorldService extends Service<HelloWorldConfiguration> {
 ```
 
 Lastly, you can enable auto configuration via package scanning.
-```
+```java
 public class HelloWorldService extends Service<HelloWorldConfiguration> {
 
   public static void main(String[] args) throws Exception {
