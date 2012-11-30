@@ -50,6 +50,6 @@ public class HelloWorldService extends Service<HelloWorldConfiguration> {
 Lastly, you can pass one or more base packages to the GuiceBundle subclass constructor
 to enable auto configuration via package scanning.
 
-Please fork [an example project](https://github.com/HubSpot/dropwizard-guice) if you'd like to get going right away. 
+Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
 
 Enjoy!
