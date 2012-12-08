@@ -86,7 +86,8 @@ public class GuiceBundle implements ConfiguredBundle<Configuration> {
 
 			@Override
 			protected void configure() {
-				binder().bind(Configuration.class).toInstance(configuration);
+				bind(Configuration.class).toInstance(configuration);
+				bind(Environment.class).toInstance(environment);
 			}
 		});
 		Injector injector = Guice.createInjector(modules);
