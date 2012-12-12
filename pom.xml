@@ -19,7 +19,7 @@
 
 	<groupId>com.hubspot.dropwizard</groupId>
 	<artifactId>dropwizard-guice</artifactId>
-	<version>0.6.2-SNAPSHOT</version>
+	<version>0.6.1.2-SNAPSHOT</version>
 	<name>Dropwizard Guice Support</name>
 	<description>Simple library for using Guice DI in a dropwizard service.</description>
 	<url>https://github.com/HubSpot/dropwizard-guice</url>
@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>com.yammer.dropwizard</groupId>
 			<artifactId>dropwizard-core</artifactId>
-			<version>${project.version}</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>

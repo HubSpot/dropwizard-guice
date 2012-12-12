@@ -22,38 +22,38 @@ import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Configuration;
 import com.yammer.dropwizard.config.Environment;
 
-public class GuiceBundle implements ConfiguredBundle<Configuration> {
+public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
 	final Logger logger = LoggerFactory.getLogger(GuiceBundle.class);
 
 	private final AutoConfig autoConfig;
 	private final List<Module> modules;
 	
-	public static class Builder {
+	public static class Builder<T extends Configuration> {
 		private AutoConfig autoConfig;
 		private List<Module> modules = Lists.newArrayList();
 		
-		public Builder addModule(Module module) {
+		public Builder<T> addModule(Module module) {
 			Preconditions.checkNotNull(module);
 			modules.add(module);
 			return this;
 		}
 
-		public Builder enableAutoConfig(String... basePackages) {
+		public Builder<T> enableAutoConfig(String... basePackages) {
 			Preconditions.checkNotNull(basePackages.length > 0);
 			Preconditions.checkArgument(autoConfig == null, "autoConfig already enabled!");
 			autoConfig = new AutoConfig(basePackages);
 			return this;
 		}
 		
-		public GuiceBundle build() {
-			return new GuiceBundle(autoConfig, modules);
+		public GuiceBundle<T> build() {
+			return new GuiceBundle<T>(autoConfig, modules);
 		}
 
 	}
 	
-	public static Builder newBuilder() {
-		return new Builder();
+	public static <T extends Configuration> Builder<T> newBuilder() {
+		return new Builder<T>();
 	}
 
 	private GuiceBundle(AutoConfig autoConfig, List<Module> modules) {
