@@ -5,6 +5,8 @@ import java.util.Set;
 import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 
+import com.yammer.dropwizard.Bundle;
+import com.yammer.dropwizard.config.Bootstrap;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -50,6 +52,10 @@ public class AutoConfig {
 		addResources(environment, injector);
 		addTasks(environment, injector);
 		addManaged(environment, injector);
+	}
+
+	public void initialize(Bootstrap bootstrap, Injector injector) {
+		addBundles(bootstrap, injector);
 	}
 
 	private void addManaged(Environment environment, Injector injector) {
@@ -108,4 +114,12 @@ public class AutoConfig {
 		}
 	}
 
+	private void addBundles(Bootstrap<?> bootstrap, Injector injector) {
+		Set<Class<? extends Bundle>> bundleClasses = reflections
+				.getSubTypesOf(Bundle.class);
+		for (Class<? extends Bundle> bundle : bundleClasses) {
+			bootstrap.addBundle(injector.getInstance(bundle));
+			logger.info(String.format("Added bundle class %s during bootstrap", bundle));
+		}
+	}
 }

@@ -28,6 +28,9 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
 	private final AutoConfig autoConfig;
 	private final List<Module> modules;
+	private Injector injector;
+	private JerseyContainerModule jerseyContainerModule;
+	private DropwizardEnvironmentModule dropwizardEnvironmentModule;
 	
 	public static class Builder<T extends Configuration> {
 		private AutoConfig autoConfig;
@@ -65,7 +68,15 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	
 	@Override
 	public void initialize(Bootstrap<?> bootstrap) {
+		jerseyContainerModule = new JerseyContainerModule();
+		dropwizardEnvironmentModule = new DropwizardEnvironmentModule();
 
+		modules.add(Modules.override(new JerseyServletModule()).with(jerseyContainerModule));
+		modules.add(dropwizardEnvironmentModule);
+		injector = Guice.createInjector(modules);
+		if (autoConfig != null) {
+			autoConfig.initialize(bootstrap, injector);
+		}
 	}
 
 	@Override
@@ -73,24 +84,16 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		@SuppressWarnings("serial")
 		GuiceContainer container = new GuiceContainer() {
 			protected ResourceConfig getDefaultResourceConfig(
-					Map<String, Object> props, WebConfig webConfig)
+																	 Map<String, Object> props, WebConfig webConfig)
 					throws javax.servlet.ServletException {
 				return environment.getJerseyResourceConfig();
 			};
 		};
 		environment.setJerseyServletContainer(container);
+		jerseyContainerModule.setContainer(container);
+		dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
 		environment.addFilter(GuiceFilter.class, configuration.getHttpConfiguration().getRootPath());
 
-		modules.add(Modules.override(new JerseyServletModule()).with(new JerseyContainerModule(container)));
-		modules.add(new AbstractModule() {
-
-			@Override
-			protected void configure() {
-				bind(Configuration.class).toInstance(configuration);
-				bind(Environment.class).toInstance(environment);
-			}
-		});
-		Injector injector = Guice.createInjector(modules);
 		if (autoConfig != null) {
 			autoConfig.run(environment, injector);
 		}
