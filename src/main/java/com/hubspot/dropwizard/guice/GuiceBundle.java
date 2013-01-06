@@ -1,7 +1,6 @@
 package com.hubspot.dropwizard.guice;
 
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +12,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.util.Modules;
-import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
-import com.sun.jersey.spi.container.servlet.WebConfig;
 import com.yammer.dropwizard.ConfiguredBundle;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Configuration;
@@ -30,6 +27,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	private Injector injector;
 	private JerseyContainerModule jerseyContainerModule;
 	private DropwizardEnvironmentModule dropwizardEnvironmentModule;
+	private GuiceContainer container;
 	
 	public static class Builder<T extends Configuration> {
 		private AutoConfig autoConfig;
@@ -67,9 +65,9 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	
 	@Override
 	public void initialize(Bootstrap<?> bootstrap) {
-		jerseyContainerModule = new JerseyContainerModule();
+		container = new GuiceContainer();
+		jerseyContainerModule = new JerseyContainerModule(container);
 		dropwizardEnvironmentModule = new DropwizardEnvironmentModule();
-
 		modules.add(Modules.override(new JerseyServletModule()).with(jerseyContainerModule));
 		modules.add(dropwizardEnvironmentModule);
 		injector = Guice.createInjector(modules);
@@ -80,16 +78,8 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
 	@Override
 	public void run(final Configuration configuration, final Environment environment) {
-		@SuppressWarnings("serial")
-		GuiceContainer container = new GuiceContainer() {
-			protected ResourceConfig getDefaultResourceConfig(
-																	 Map<String, Object> props, WebConfig webConfig)
-					throws javax.servlet.ServletException {
-				return environment.getJerseyResourceConfig();
-			};
-		};
+		container.setResourceConfig(environment.getJerseyResourceConfig());
 		environment.setJerseyServletContainer(container);
-		jerseyContainerModule.setContainer(container);
 		dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
 		environment.addFilter(GuiceFilter.class, configuration.getHttpConfiguration().getRootPath());
 

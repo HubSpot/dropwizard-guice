@@ -25,7 +25,10 @@ public class GuiceContainer extends ServletContainer {
 
     @Inject
     private Injector injector;
+    
     private WebApplication webapp;
+    
+    private ResourceConfig resourceConfig = new DefaultResourceConfig();
 
     public class ServletGuiceComponentProviderFactory extends GuiceComponentProviderFactory {
         public ServletGuiceComponentProviderFactory(ResourceConfig config, Injector injector) {
@@ -51,10 +54,14 @@ public class GuiceContainer extends ServletContainer {
     public GuiceContainer(Class<? extends Application> app) {
       super(app);
     }
+    
+    public void setResourceConfig(ResourceConfig resourceConfig) {
+	    this.resourceConfig = resourceConfig;
+    }
 
     @Override
     protected ResourceConfig getDefaultResourceConfig(Map<String, Object> props, WebConfig webConfig) throws ServletException {
-    	return new DefaultResourceConfig();
+    	return resourceConfig;
     }
 
     @Override
