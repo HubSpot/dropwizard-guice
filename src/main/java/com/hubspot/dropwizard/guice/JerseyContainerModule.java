@@ -5,15 +5,22 @@ import com.google.inject.Provides;
 import com.sun.jersey.spi.container.WebApplication;
 
 public class JerseyContainerModule extends AbstractModule {
-	private final GuiceContainer container;
+	private GuiceContainer container;
 
-	public JerseyContainerModule(GuiceContainer container) {
+	public JerseyContainerModule() {
+	}
+
+	public void setContainer(final GuiceContainer container) {
 		this.container = container;
 	}
 
 	@Override
 	protected void configure() {
-		binder().bind(GuiceContainer.class).toInstance(container);
+	}
+
+	@Provides
+	public GuiceContainer providesGuiceContainer() {
+		return container;
 	}
 
 	@Provides
