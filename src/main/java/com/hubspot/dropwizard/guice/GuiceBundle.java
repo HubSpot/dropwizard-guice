@@ -94,6 +94,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		container.setResourceConfig(environment.getJerseyResourceConfig());
 		environment.setJerseyServletContainer(container);
 		environment.addFilter(GuiceFilter.class, configuration.getHttpConfiguration().getRootPath());
+		setEnvironment(configuration, environment);
 
 		if (autoConfig != null) {
 			autoConfig.run(environment, injector);
