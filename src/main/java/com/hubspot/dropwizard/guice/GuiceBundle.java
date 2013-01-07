@@ -28,7 +28,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	private Injector injector;
 	private JerseyContainerModule jerseyContainerModule;
 	private DropwizardEnvironmentModule dropwizardEnvironmentModule;
-	private Optional<Class<T>> configurationClass;
+	private Optional<Class<T>> configurationClass = Optional.<Class<T>>absent();
 	private GuiceContainer container;
 	
 	public static class Builder<T extends Configuration> {
