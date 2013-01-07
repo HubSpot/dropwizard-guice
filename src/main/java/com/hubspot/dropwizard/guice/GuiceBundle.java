@@ -106,4 +106,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
 	}
 
+	public Injector getInjector() {
+		return injector;
+	}
 }
