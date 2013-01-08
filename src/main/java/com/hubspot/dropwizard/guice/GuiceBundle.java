@@ -2,6 +2,7 @@ package com.hubspot.dropwizard.guice;
 
 import java.util.List;
 
+import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,15 +28,22 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	private Injector injector;
 	private JerseyContainerModule jerseyContainerModule;
 	private DropwizardEnvironmentModule dropwizardEnvironmentModule;
+	private Optional<Class<T>> configurationClass;
 	private GuiceContainer container;
 	
 	public static class Builder<T extends Configuration> {
 		private AutoConfig autoConfig;
 		private List<Module> modules = Lists.newArrayList();
+		private Optional<Class<T>> configurationClass;
 		
 		public Builder<T> addModule(Module module) {
 			Preconditions.checkNotNull(module);
 			modules.add(module);
+			return this;
+		}
+
+		public Builder<T> setConfigClass(Class<T> clazz) {
+			configurationClass = Optional.of(clazz);
 			return this;
 		}
 
@@ -47,7 +55,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		}
 		
 		public GuiceBundle<T> build() {
-			return new GuiceBundle<T>(autoConfig, modules);
+			return new GuiceBundle<T>(autoConfig, modules, configurationClass);
 		}
 
 	}
@@ -56,18 +64,23 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		return new Builder<T>();
 	}
 
-	private GuiceBundle(AutoConfig autoConfig, List<Module> modules) {
+	private GuiceBundle(AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass) {
 		Preconditions.checkNotNull(modules);
 		Preconditions.checkArgument(!modules.isEmpty());
 		this.modules = modules;
 		this.autoConfig = autoConfig;
+		this.configurationClass = configurationClass;
 	}
 	
 	@Override
 	public void initialize(Bootstrap<?> bootstrap) {
 		container = new GuiceContainer();
 		jerseyContainerModule = new JerseyContainerModule(container);
-		dropwizardEnvironmentModule = new DropwizardEnvironmentModule();
+		if (configurationClass.isPresent()) {
+			dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
+		} else {
+			dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
+		}
 		modules.add(Modules.override(new JerseyServletModule()).with(jerseyContainerModule));
 		modules.add(dropwizardEnvironmentModule);
 		injector = Guice.createInjector(modules);
@@ -77,15 +90,23 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	}
 
 	@Override
-	public void run(final Configuration configuration, final Environment environment) {
+	public void run(final T configuration, final Environment environment) {
 		container.setResourceConfig(environment.getJerseyResourceConfig());
 		environment.setJerseyServletContainer(container);
-		dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
 		environment.addFilter(GuiceFilter.class, configuration.getHttpConfiguration().getRootPath());
+		setEnvironment(configuration, environment);
 
 		if (autoConfig != null) {
 			autoConfig.run(environment, injector);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private void setEnvironment(final T configuration, final Environment environment) {
+		dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
+	}
+
+	public Injector getInjector() {
+		return injector;
+	}
 }
