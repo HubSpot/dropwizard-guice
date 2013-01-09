@@ -34,7 +34,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	public static class Builder<T extends Configuration> {
 		private AutoConfig autoConfig;
 		private List<Module> modules = Lists.newArrayList();
-		private Optional<Class<T>> configurationClass;
+		private Optional<Class<T>> configurationClass = Optional.<Class<T>>absent();
 		
 		public Builder<T> addModule(Module module) {
 			Preconditions.checkNotNull(module);
