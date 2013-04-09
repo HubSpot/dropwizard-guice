@@ -26,7 +26,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	private final AutoConfig autoConfig;
 	private final List<Module> modules;
 	private Injector injector;
-	private JerseyContainerModule jerseyContainerModule;
 	private DropwizardEnvironmentModule dropwizardEnvironmentModule;
 	private Optional<Class<T>> configurationClass;
 	private GuiceContainer container;
@@ -75,13 +74,13 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 	@Override
 	public void initialize(Bootstrap<?> bootstrap) {
 		container = new GuiceContainer();
-		jerseyContainerModule = new JerseyContainerModule(container);
+		JerseyContainerModule jerseyContainerModule = new JerseyContainerModule(container);
 		if (configurationClass.isPresent()) {
 			dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
 		} else {
 			dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
 		}
-		modules.add(Modules.override(new JerseyServletModule()).with(jerseyContainerModule));
+		modules.add(jerseyContainerModule);
 		modules.add(dropwizardEnvironmentModule);
 		injector = Guice.createInjector(modules);
 		if (autoConfig != null) {
