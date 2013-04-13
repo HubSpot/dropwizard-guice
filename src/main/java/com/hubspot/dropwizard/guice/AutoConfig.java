@@ -63,7 +63,7 @@ public class AutoConfig {
 				.getSubTypesOf(Managed.class);
 		for (Class<? extends Managed> managed : managedClasses) {
 			environment.manage(injector.getInstance(managed));
-			logger.info("Added managed: " + managed);
+			logger.info("Added managed: {}", managed);
 		}
 	}
 
@@ -72,7 +72,7 @@ public class AutoConfig {
 				.getSubTypesOf(Task.class);
 		for (Class<? extends Task> task : taskClasses) {
 			environment.addTask(injector.getInstance(task));
-			logger.info("Added task: " + task);
+			logger.info("Added task: {}", task);
 		}
 	}
 
@@ -81,7 +81,7 @@ public class AutoConfig {
 				.getSubTypesOf(HealthCheck.class);
 		for (Class<? extends HealthCheck> healthCheck : healthCheckClasses) {
 			environment.addHealthCheck(injector.getInstance(healthCheck));
-			logger.info("Added healthCheck: " + healthCheck);
+			logger.info("Added healthCheck: {}", healthCheck);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class AutoConfig {
 				.getSubTypesOf(InjectableProvider.class);
 		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
 			environment.addProvider(injectableProvider);
-			logger.info("Added injectableProvider: " + injectableProvider);
+			logger.info("Added injectableProvider: {}", injectableProvider);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class AutoConfig {
 				.getTypesAnnotatedWith(Provider.class);
 		for (Class<?> provider : providerClasses) {
 			environment.addProvider(provider);
-			logger.info("Added provider class: " + provider);
+			logger.info("Added provider class: {}", provider);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class AutoConfig {
 				.getTypesAnnotatedWith(Path.class);
 		for (Class<?> resource : resourceClasses) {
 			environment.addResource(resource);
-			logger.info("Added resource class: " + resource);
+			logger.info("Added resource class: {}", resource);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class AutoConfig {
 				.getSubTypesOf(Bundle.class);
 		for (Class<? extends Bundle> bundle : bundleClasses) {
 			bootstrap.addBundle(injector.getInstance(bundle));
-			logger.info(String.format("Added bundle class %s during bootstrap", bundle));
+			logger.info("Added bundle class {} during bootstrap", bundle);
 		}
 	}
 }
