@@ -77,7 +77,8 @@ public class AutoConfig {
 		Set<Class<? extends InjectableHealthCheck>> healthCheckClasses = reflections
 				.getSubTypesOf(InjectableHealthCheck.class);
 		for (Class<? extends InjectableHealthCheck> healthCheck : healthCheckClasses) {
-			environment.healthChecks().register(healthCheck.getName(), injector.getInstance(healthCheck));
+            InjectableHealthCheck instance = injector.getInstance(healthCheck);
+            environment.healthChecks().register(instance.getName(), instance);
 			logger.info("Added injectableHealthCheck: {}", healthCheck);
 		}
 	}
