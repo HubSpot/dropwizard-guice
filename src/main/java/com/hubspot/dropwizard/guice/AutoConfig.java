@@ -5,7 +5,6 @@ import com.codahale.dropwizard.lifecycle.Managed;
 import com.codahale.dropwizard.servlets.tasks.Task;
 import com.codahale.dropwizard.setup.Bootstrap;
 import com.codahale.dropwizard.setup.Environment;
-import com.codahale.metrics.health.HealthCheck;
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 import com.sun.jersey.spi.inject.InjectableProvider;
@@ -75,11 +74,11 @@ public class AutoConfig {
 	}
 
 	private void addHealthChecks(Environment environment, Injector injector) {
-		Set<Class<? extends HealthCheck>> healthCheckClasses = reflections
-				.getSubTypesOf(HealthCheck.class);
-		for (Class<? extends HealthCheck> healthCheck : healthCheckClasses) {
-			environment.healthChecks().register("foo", injector.getInstance(healthCheck));
-			logger.info("Added healthCheck: {}", healthCheck);
+		Set<Class<? extends InjectableHealthCheck>> healthCheckClasses = reflections
+				.getSubTypesOf(InjectableHealthCheck.class);
+		for (Class<? extends InjectableHealthCheck> healthCheck : healthCheckClasses) {
+			environment.healthChecks().register(healthCheck.getName(), injector.getInstance(healthCheck));
+			logger.info("Added injectableHealthCheck: {}", healthCheck);
 		}
 	}
 
