@@ -99,7 +99,8 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
                 return container;
             }
         });
-        environment.servlets().addFilter("Guice Filter", GuiceFilter.class);
+        environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
+                .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
         setEnvironment(configuration, environment);
 
         if (autoConfig != null) {
