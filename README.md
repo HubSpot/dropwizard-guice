@@ -9,15 +9,19 @@ the dropwizard environment upon service start.
 
 Simply install a new instance of the bundle during your service initialization
 ```java
-public class HelloWorldService extends Service<HelloWorldConfiguration> {
+public class HelloWorldService extends Application<HelloWorldConfiguration> {
 
   public static void main(String[] args) throws Exception {
 		new HelloWorldService().run(args);
 	}
 
     @Override
+    public String getName() {
+        return "hello-world";
+    }
+
+    @Override
     public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
-        bootstrap.setName("hello-world");
         bootstrap.addBundle(GuiceBundle.newBuilder()
             .addModule(new HelloWorldModule())
             .build()
@@ -26,8 +30,8 @@ public class HelloWorldService extends Service<HelloWorldConfiguration> {
 
 	@Override
 	public void run(HelloWorldConfiguration configuration, final Environment environment) {
-		environment.addResource(HelloWorldResource.class);
-		environment.addHealthCheck(TemplateHealthCheck.class);
+		environment.jersey().register(HelloWorldResource.class);
+		environment.healthChecks().register("Template", TemplateHealthCheck.class);
 	}
 
 }
@@ -54,6 +58,7 @@ public class HelloWorldService extends Service<HelloWorldConfiguration> {
     @Override
     public void run(HelloWorldConfiguration configuration, final Environment environment) {
         // now you don't need to add resources, tasks, healthchecks or providers
+        // you must have your health checks inherit from InjectableHealthCheck in order for them to be injected
     }
 
 }

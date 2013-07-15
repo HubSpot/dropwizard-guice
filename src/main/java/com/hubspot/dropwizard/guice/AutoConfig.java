@@ -1,12 +1,13 @@
 package com.hubspot.dropwizard.guice;
 
-import java.util.Set;
-
-import javax.ws.rs.Path;
-import javax.ws.rs.ext.Provider;
-
-import com.yammer.dropwizard.Bundle;
-import com.yammer.dropwizard.config.Bootstrap;
+import com.codahale.dropwizard.Bundle;
+import com.codahale.dropwizard.lifecycle.Managed;
+import com.codahale.dropwizard.servlets.tasks.Task;
+import com.codahale.dropwizard.setup.Bootstrap;
+import com.codahale.dropwizard.setup.Environment;
+import com.google.common.base.Preconditions;
+import com.google.inject.Injector;
+import com.sun.jersey.spi.inject.InjectableProvider;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -16,13 +17,9 @@ import org.reflections.util.FilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.inject.Injector;
-import com.sun.jersey.spi.inject.InjectableProvider;
-import com.yammer.dropwizard.config.Environment;
-import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.tasks.Task;
-import com.yammer.metrics.core.HealthCheck;
+import javax.ws.rs.Path;
+import javax.ws.rs.ext.Provider;
+import java.util.Set;
 
 public class AutoConfig {
 
@@ -62,7 +59,7 @@ public class AutoConfig {
 		Set<Class<? extends Managed>> managedClasses = reflections
 				.getSubTypesOf(Managed.class);
 		for (Class<? extends Managed> managed : managedClasses) {
-			environment.manage(injector.getInstance(managed));
+			environment.lifecycle().manage(injector.getInstance(managed));
 			logger.info("Added managed: {}", managed);
 		}
 	}
@@ -71,17 +68,18 @@ public class AutoConfig {
 		Set<Class<? extends Task>> taskClasses = reflections
 				.getSubTypesOf(Task.class);
 		for (Class<? extends Task> task : taskClasses) {
-			environment.addTask(injector.getInstance(task));
+			environment.admin().addTask(injector.getInstance(task));
 			logger.info("Added task: {}", task);
 		}
 	}
 
 	private void addHealthChecks(Environment environment, Injector injector) {
-		Set<Class<? extends HealthCheck>> healthCheckClasses = reflections
-				.getSubTypesOf(HealthCheck.class);
-		for (Class<? extends HealthCheck> healthCheck : healthCheckClasses) {
-			environment.addHealthCheck(injector.getInstance(healthCheck));
-			logger.info("Added healthCheck: {}", healthCheck);
+		Set<Class<? extends InjectableHealthCheck>> healthCheckClasses = reflections
+				.getSubTypesOf(InjectableHealthCheck.class);
+		for (Class<? extends InjectableHealthCheck> healthCheck : healthCheckClasses) {
+            InjectableHealthCheck instance = injector.getInstance(healthCheck);
+            environment.healthChecks().register(instance.getName(), instance);
+			logger.info("Added injectableHealthCheck: {}", healthCheck);
 		}
 	}
 
@@ -91,7 +89,7 @@ public class AutoConfig {
 		Set<Class<? extends InjectableProvider>> injectableProviders = reflections
 				.getSubTypesOf(InjectableProvider.class);
 		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
-			environment.addProvider(injectableProvider);
+			environment.jersey().register(injectableProvider);
 			logger.info("Added injectableProvider: {}", injectableProvider);
 		}
 	}
@@ -100,7 +98,7 @@ public class AutoConfig {
 		Set<Class<?>> providerClasses = reflections
 				.getTypesAnnotatedWith(Provider.class);
 		for (Class<?> provider : providerClasses) {
-			environment.addProvider(provider);
+			environment.jersey().register(provider);
 			logger.info("Added provider class: {}", provider);
 		}
 	}
@@ -109,7 +107,7 @@ public class AutoConfig {
 		Set<Class<?>> resourceClasses = reflections
 				.getTypesAnnotatedWith(Path.class);
 		for (Class<?> resource : resourceClasses) {
-			environment.addResource(resource);
+			environment.jersey().register(resource);
 			logger.info("Added resource class: {}", resource);
 		}
 	}
