@@ -92,6 +92,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     @Override
     public void run(final T configuration, final Environment environment) {
         container.setResourceConfig(environment.jersey().getResourceConfig());
+        container.getServletContext().addFilter("Guice Filter", GuiceFilter.class);
         environment.jersey().replace(new Function<ResourceConfig, ServletContainer>() {
             @Nullable
             @Override
@@ -99,7 +100,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
                 return container;
             }
         });
-        environment.servlets().addFilter("Guice Filter", GuiceFilter.class);
         setEnvironment(configuration, environment);
 
         if (autoConfig != null) {
