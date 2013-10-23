@@ -1,7 +1,7 @@
 package com.hubspot.dropwizard.guice;
 
-import com.codahale.dropwizard.Configuration;
-import com.codahale.dropwizard.setup.Environment;
+import io.dropwizard.Configuration;
+import io.dropwizard.setup.Environment;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;

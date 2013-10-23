@@ -48,7 +48,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.codahale.dropwizard</groupId>
+			<groupId>io.dropwizard</groupId>
 			<artifactId>dropwizard-core</artifactId>
 			<version>0.7.0-SNAPSHOT</version>
 		</dependency>

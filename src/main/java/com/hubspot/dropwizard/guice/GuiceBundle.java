@@ -1,9 +1,9 @@
 package com.hubspot.dropwizard.guice;
 
-import com.codahale.dropwizard.Configuration;
-import com.codahale.dropwizard.ConfiguredBundle;
-import com.codahale.dropwizard.setup.Bootstrap;
-import com.codahale.dropwizard.setup.Environment;
+import io.dropwizard.Configuration;
+import io.dropwizard.ConfiguredBundle;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
