@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
@@ -30,6 +31,8 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private DropwizardEnvironmentModule dropwizardEnvironmentModule;
     private Optional<Class<T>> configurationClass;
     private GuiceContainer container;
+    private Stage stage;
+
 
     public static class Builder<T extends Configuration> {
         private AutoConfig autoConfig;
@@ -55,7 +58,11 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
         public GuiceBundle<T> build() {
-            return new GuiceBundle<T>(autoConfig, modules, configurationClass);
+            return build(Stage.PRODUCTION);
+        }
+
+        public GuiceBundle<T> build(Stage s) {
+            return new GuiceBundle<T>(s, autoConfig, modules, configurationClass);
         }
 
     }
@@ -64,7 +71,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         return new Builder<T>();
     }
 
-    private GuiceBundle(AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass) {
+    private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass) {
         Preconditions.checkNotNull(modules);
         Preconditions.checkArgument(!modules.isEmpty());
         this.modules = modules;
@@ -83,10 +90,16 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
         modules.add(jerseyContainerModule);
         modules.add(dropwizardEnvironmentModule);
-        injector = Guice.createInjector(modules);
+
+        initInjector();
+
         if (autoConfig != null) {
             autoConfig.initialize(bootstrap, injector);
         }
+    }
+
+    private void initInjector() {
+        injector = Guice.createInjector(this.stage, modules);
     }
 
     @Override
