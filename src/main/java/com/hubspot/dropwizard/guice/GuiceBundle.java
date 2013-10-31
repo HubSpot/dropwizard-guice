@@ -43,8 +43,8 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
      * 
      * Idea behind separating this out is to enable integrating applications to 
      * use alternate Guice factories like,
-     * @see <a href=https://code.google.com/p/mycila/">Mycila</a> or 
-     * @see <a href="https://github.com/Netflix/governator">Governator</a> etc.
+     * - Mycila (https://code.google.com/p/mycila/), 
+     * - Governator (https://github.com/Netflix/governator)
      */
 	public static interface InjectorFactory {
 		public Injector create(final Stage stage, final List<Module> modules);
@@ -109,6 +109,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         this.autoConfig = autoConfig;
         this.configurationClass = configurationClass;
         this.injectorFactory = injectorFactory;
+        this.stage = stage;
     }
 
     @Override
