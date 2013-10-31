@@ -1,7 +1,15 @@
 package com.hubspot.dropwizard.guice;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codahale.dropwizard.Configuration;
 import com.codahale.dropwizard.ConfiguredBundle;
+import com.codahale.dropwizard.lifecycle.Managed;
 import com.codahale.dropwizard.setup.Bootstrap;
 import com.codahale.dropwizard.setup.Environment;
 import com.google.common.base.Function;
@@ -17,13 +25,6 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-
-import java.util.List;
-
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
     final Logger logger = LoggerFactory.getLogger(GuiceBundle.class);
@@ -37,18 +38,19 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private GuiceContainer container;
     private Stage stage;
     
-
-    /**
-     * Factory to create Guice Injector with supplied Stage and List of Modules. 
-     * 
-     * Idea behind separating this out is to enable integrating applications to 
-     * use alternate Guice factories like,
-     * - Mycila (https://code.google.com/p/mycila/), 
-     * - Governator (https://github.com/Netflix/governator)
-     */
+	/**
+	 * Factory to create Guice Injector with supplied Stage and List of Modules.
+	 * 
+	 * Idea behind separating this out is to enable integrating applications to
+	 * use alternate Guice factories like, - Mycila
+	 * (https://code.google.com/p/mycila/), - Governator
+	 * (https://github.com/Netflix/governator)
+	 */
 	public static interface InjectorFactory {
+		// create
 		public Injector create(final Stage stage, final List<Module> modules);
-		
+		// destroy
+		public void destroy(final Injector injector);
 	}
 
     public static class Builder<T extends Configuration> {
@@ -56,11 +58,16 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         private List<Module> modules = Lists.newArrayList();
         private Optional<Class<T>> configurationClass = Optional.<Class<T>>absent();
         
-        private InjectorFactory injectorFactory = new InjectorFactory() {
+		private InjectorFactory injectorFactory = new InjectorFactory() {
 			@Override
 			public Injector create(final Stage stage, final List<Module> modules) {
 				// Default
 				return Guice.createInjector(stage, modules);
+			}
+
+			@Override
+			public void destroy(Injector injector) {
+				// Nothing to do
 			}
 		};
 
@@ -131,9 +138,10 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
     }
 
-    private void initInjector() {
-    	injector = injectorFactory.create(this.stage, ImmutableList.copyOf(this.modules));
-    }
+	private void initInjector() {
+		// Create Injector
+		injector = injectorFactory.create(this.stage, ImmutableList.copyOf(this.modules));
+	}
 
     @Override
     public void run(final T configuration, final Environment environment) {
@@ -152,6 +160,21 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         if (autoConfig != null) {
             autoConfig.run(environment, injector);
         }
+        
+        // Manage Injector life-cycle
+        environment.lifecycle().manage(new Managed() {
+			
+			@Override
+			public void stop() throws Exception {
+				// Destroy Injector
+				injectorFactory.destroy(injector);
+			}
+			
+			@Override
+			public void start() throws Exception {
+				// Nothing to do
+			}
+		});
     }
 
     @SuppressWarnings("unchecked")
