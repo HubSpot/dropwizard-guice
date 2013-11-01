@@ -1,10 +1,10 @@
 package com.hubspot.dropwizard.guice;
 
-import com.codahale.dropwizard.Bundle;
-import com.codahale.dropwizard.lifecycle.Managed;
-import com.codahale.dropwizard.servlets.tasks.Task;
-import com.codahale.dropwizard.setup.Bootstrap;
-import com.codahale.dropwizard.setup.Environment;
+import io.dropwizard.Bundle;
+import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.servlets.tasks.Task;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 import com.sun.jersey.spi.inject.InjectableProvider;
