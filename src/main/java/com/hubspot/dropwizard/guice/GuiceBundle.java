@@ -74,9 +74,11 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass) {
         Preconditions.checkNotNull(modules);
         Preconditions.checkArgument(!modules.isEmpty());
+        Preconditions.checkNotNull(stage);
         this.modules = modules;
         this.autoConfig = autoConfig;
         this.configurationClass = configurationClass;
+        this.stage = stage;
     }
 
     @Override
