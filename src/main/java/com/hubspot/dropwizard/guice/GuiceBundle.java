@@ -1,11 +1,6 @@
 package com.hubspot.dropwizard.guice;
 
-import java.util.List;
-
 import com.google.common.base.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -18,6 +13,10 @@ import com.yammer.dropwizard.ConfiguredBundle;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Configuration;
 import com.yammer.dropwizard.config.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
@@ -83,7 +82,12 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		}
 		modules.add(Modules.override(new JerseyServletModule()).with(jerseyContainerModule));
 		modules.add(dropwizardEnvironmentModule);
-		injector = Guice.createInjector(modules);
+        try {
+			injector = Guice.createInjector(modules);
+        } catch(Exception ie) {
+            logger.error("Exception occurred when creating Guice Injector - exiting", ie);
+            System.exit(-1);
+        }
 		if (autoConfig != null) {
 			autoConfig.initialize(bootstrap, injector);
 		}
