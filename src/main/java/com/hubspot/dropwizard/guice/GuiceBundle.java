@@ -101,7 +101,12 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     }
 
     private void initInjector() {
-        injector = Guice.createInjector(this.stage, modules);
+        try {
+	        injector = Guice.createInjector(this.stage, modules);
+        } catch(Exception ie) {
+		    logger.error("Exception occurred when creating Guice Injector - exiting", ie);
+		    System.exit(1);
+	    }
     }
 
     @Override

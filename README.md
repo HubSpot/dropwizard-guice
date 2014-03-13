@@ -9,10 +9,21 @@ the dropwizard environment upon service start.
 
 Simply install a new instance of the bundle during your service initialization
 ```java
-public class HelloWorldService extends Application<HelloWorldConfiguration> {
+public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
 
-  public static void main(String[] args) throws Exception {
-		new HelloWorldService().run(args);
+	public static void main(String[] args) throws Exception {
+		new HelloWorldApplication().run(args);
+	}
+
+	@Override
+	public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
+
+		GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
+				.addModule(new HelloWorldModule())
+				.setConfigClass(HelloWorldConfiguration.class)
+				.build();
+
+		bootstrap.addBundle(guiceBundle);
 	}
 
     @Override
@@ -20,47 +31,44 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
         return "hello-world";
     }
 
-    @Override
-    public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
-        bootstrap.addBundle(GuiceBundle.newBuilder()
-            .addModule(new HelloWorldModule())
-            .build()
-        );
-    }
-
 	@Override
-	public void run(HelloWorldConfiguration configuration, final Environment environment) {
-		environment.jersey().register(HelloWorldResource.class);
-		environment.healthChecks().register("Template", TemplateHealthCheck.class);
+	public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
+        environment.jersey().register(HelloWorldResource.class);
+        environment.healthChecks().register("Template", TemplateHealthCheck.class);
 	}
-
 }
 ```
 
 Lastly, you can enable auto configuration via package scanning.
 ```java
-public class HelloWorldService extends Service<HelloWorldConfiguration> {
+public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
 
-  public static void main(String[] args) throws Exception {
-        new HelloWorldService().run(args);
-    }
+	public static void main(String[] args) throws Exception {
+		new HelloWorldApplication().run(args);
+	}
+
+	@Override
+	public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
+
+		GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
+				.addModule(new HelloWorldModule())
+				.enableAutoConfig(getClass().getPackage().getName())
+				.setConfigClass(HelloWorldConfiguration.class)
+				.build();
+
+		bootstrap.addBundle(guiceBundle);
+	}
 
     @Override
-    public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
-        bootstrap.setName("hello-world");
-        bootstrap.addBundle(GuiceBundle.newBuilder()
-            .addModule(new HelloWorldModule())
-            .enableAutoConfig(getClass().getPackage().getName())
-            .build()
-        );
+    public String getName() {
+        return "hello-world";
     }
 
-    @Override
-    public void run(HelloWorldConfiguration configuration, final Environment environment) {
+	@Override
+	public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
         // now you don't need to add resources, tasks, healthchecks or providers
         // you must have your health checks inherit from InjectableHealthCheck in order for them to be injected
-    }
-
+	}
 }
 ```
 
