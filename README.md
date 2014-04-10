@@ -71,6 +71,27 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 	}
 }
 ```
+If you are having trouble accessing your Configuration or Environment inside a Guice Module, you could try using a provider.
+
+```java
+public class HelloWorldModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+        // anything you'd like to configure
+    }
+
+    @Provides
+    public SomePool providesSomethingThatNeedsConfiguration(HelloWorldConfiguration configuration) {
+        return new SomePool(configuration.getPoolName());
+    }
+
+    @Provides
+    public SomeManager providesSomenthingThatNeedsEnvironment(Environment env) {
+        return new SomeManager(env.getSomethingFromHere()));
+    }
+}
+```
 
 Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
 
