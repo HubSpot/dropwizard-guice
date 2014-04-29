@@ -7,6 +7,16 @@ the dropwizard environment upon service start.
 
 ### Usage
 
+```xml
+    <dependencies>
+        <dependency>
+            <groupId>com.hubspot.dropwizard</groupId>
+            <artifactId>dropwizard-guice</artifactId>
+            <version>0.7.0.1</version>
+        </dependency>
+    </dependencies>
+```
+
 Simply install a new instance of the bundle during your service initialization
 ```java
 public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
