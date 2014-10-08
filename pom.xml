@@ -19,7 +19,7 @@
 
 	<groupId>com.hubspot.dropwizard</groupId>
 	<artifactId>dropwizard-guice</artifactId>
-	<version>0.7.0.4-SNAPSHOT</version>
+	<version>0.7.0.4-guice4-SNAPSHOT</version>
 	<name>Dropwizard Guice Support</name>
 	<description>Simple library for using Guice DI in a dropwizard service.</description>
 	<url>https://github.com/HubSpot/dropwizard-guice</url>
@@ -55,12 +55,7 @@
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-servlet</artifactId>
-			<version>3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-guice</artifactId>
-			<version>1.18.1</version>
+            <version>4.0-beta5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
