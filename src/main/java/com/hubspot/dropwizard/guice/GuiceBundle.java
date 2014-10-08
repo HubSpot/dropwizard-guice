@@ -7,8 +7,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.servlet.GuiceFilter;
-import com.google.inject.util.Modules;
-import com.sun.jersey.guice.JerseyServletModule;
 import com.yammer.dropwizard.ConfiguredBundle;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Configuration;
@@ -80,7 +78,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 		} else {
 			dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
 		}
-		modules.add(Modules.override(new JerseyServletModule()).with(jerseyContainerModule));
+		modules.add(jerseyContainerModule);
 		modules.add(dropwizardEnvironmentModule);
         try {
 			injector = Guice.createInjector(modules);
