@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 
     <repositories>
         <repository>
@@ -17,58 +17,63 @@
         </repository>
     </repositories>
 
-	<groupId>com.hubspot.dropwizard</groupId>
-	<artifactId>dropwizard-guice</artifactId>
-	<version>0.7.0.4-guice4-SNAPSHOT</version>
-	<name>Dropwizard Guice Support</name>
-	<description>Simple library for using Guice DI in a dropwizard service.</description>
-	<url>https://github.com/HubSpot/dropwizard-guice</url>
+    <groupId>com.hubspot.dropwizard</groupId>
+    <artifactId>dropwizard-guice</artifactId>
+    <version>0.7.0.4-guice4-SNAPSHOT</version>
+    <name>Dropwizard Guice Support</name>
+    <description>Simple library for using Guice DI in a dropwizard service.</description>
+    <url>https://github.com/HubSpot/dropwizard-guice</url>
 
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<scm>
-		<connection>scm:git:git@github.com:HubSpot/dropwizard-guice.git</connection>
-		<developerConnection>scm:git:git@github.com:HubSpot/dropwizard-guice.git</developerConnection>
-		<url>git@github.com:HubSpot/dropwizard-guice.git</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git@github.com:HubSpot/dropwizard-guice.git</connection>
+        <developerConnection>scm:git:git@github.com:HubSpot/dropwizard-guice.git</developerConnection>
+        <url>git@github.com:HubSpot/dropwizard-guice.git</url>
+    </scm>
 
-	<developers>
-		<developer>
-			<id>eliast</id>
-			<name>Elias Torres</name>
-			<email>elias@hubspot.com</email>
-		</developer>
-	</developers>
+    <developers>
+        <developer>
+            <id>eliast</id>
+            <name>Elias Torres</name>
+            <email>elias@hubspot.com</email>
+        </developer>
+    </developers>
 
-	<dependencies>
+    <dependencies>
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
             <version>0.7.0</version>
         </dependency>
-		<dependency>
-			<groupId>com.google.inject.extensions</groupId>
-			<artifactId>guice-servlet</artifactId>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
             <version>4.0-beta5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-servlet</artifactId>
+            <version>4.0-beta5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.9</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
