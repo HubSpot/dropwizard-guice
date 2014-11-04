@@ -12,7 +12,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
@@ -22,7 +21,6 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
-import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -39,39 +37,13 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private Optional<Class<T>> configurationClass;
     private GuiceContainer container;
     private Stage stage;
-    
-    /**
-     * Factory to create Guice Injector with supplied Stage and List of Modules.
-     * 
-     * Idea behind separating this out is to enable integrating applications to
-     * use alternate Guice factories like, - Mycila
-     * (https://code.google.com/p/mycila/), - Governator
-     * (https://github.com/Netflix/governator)
-     */
-    public static interface InjectorFactory {
-        // create
-        public Injector create(final Stage stage, final List<Module> modules);
-        // destroy
-        public void destroy(final Injector injector);
-    }
 
     public static class Builder<T extends Configuration> {
         private AutoConfig autoConfig;
         private List<Module> modules = Lists.newArrayList();
         private Optional<Class<T>> configurationClass = Optional.absent();
 
-        private InjectorFactory injectorFactory = new InjectorFactory() {
-            @Override
-            public Injector create(final Stage stage, final List<Module> modules) {
-            // Default
-                return Guice.createInjector(stage, modules);
-            }
-
-            @Override
-            public void destroy(Injector injector) {
-                // Nothing to do
-            }
-        };
+        private InjectorFactory injectorFactory = new InjectorFactoryImpl();
 
         public Builder<T> addModule(Module module) {
             Preconditions.checkNotNull(module);
@@ -166,21 +138,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         if (autoConfig != null) {
             autoConfig.run(environment, injector);
         }
-        
-        // Manage Injector life-cycle
-        environment.lifecycle().manage(new Managed() {
-
-            @Override
-            public void start() throws Exception
-            {
-
-            }
-
-            @Override
-            public void stop() throws Exception {
-                injectorFactory.destroy(injector);
-            }
-        });
     }
 
     @SuppressWarnings("unchecked")
