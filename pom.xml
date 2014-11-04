@@ -17,11 +17,22 @@
     </repositories>
 
     <groupId>com.hubspot.dropwizard</groupId>
-    <artifactId>dropwizard-guice</artifactId>
+    <artifactId>dropwizard-governor</artifactId>
     <version>0.7.1.1-SNAPSHOT</version>
-    <name>Dropwizard Guice Support</name>
-    <description>Simple library for using Guice DI in a dropwizard service.</description>
+    <name>Dropwizard Governor Support</name>
+    <description>Simple library for using Governator Guice DI in a dropwizard service.</description>
     <url>https://github.com/HubSpot/dropwizard-guice</url>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>http://nexus.arclight.com.au/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://nexus.arclight.com.au/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <licenses>
         <license>
@@ -54,7 +65,7 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
-            <version>0.7.0</version>
+            <version>0.7.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.code.findbugs</groupId>
