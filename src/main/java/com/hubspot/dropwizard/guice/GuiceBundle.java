@@ -42,7 +42,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         private AutoConfig autoConfig;
         private List<Module> modules = Lists.newArrayList();
         private Optional<Class<T>> configurationClass = Optional.absent();
-
         private InjectorFactory injectorFactory = new InjectorFactoryImpl();
 
         public Builder<T> addModule(Module module) {
