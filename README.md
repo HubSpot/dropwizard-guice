@@ -103,6 +103,38 @@ public class HelloWorldModule extends AbstractModule {
 }
 ```
 
+You can also replace the default Guice `Injector` by implementing your own `InjectorFactory`. For example if you want 
+to use [Governator](https://github.com/Netflix/governator) you can create the following implementation:
+
+```java
+public class GovernatorInjectorFactory implements InjectorFactory
+{
+    @Override
+    public Injector create( final Stage stage, final List<Module> modules )
+    {
+        return LifecycleInjector.builder().inStage( stage ).withModules( modules ).build()
+            .createInjector();
+    }
+}
+```
+
+and then set the InjectorFactory when initializing the GuiceBundle:
+
+```java
+	@Override
+	public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
+
+		GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
+				.addModule(new HelloWorldModule())
+				.enableAutoConfig(getClass().getPackage().getName())
+				.setConfigClass(HelloWorldConfiguration.class)
+				.setInjectorFactory( new GovernatorInjectorFactory() )
+				.build();
+
+		bootstrap.addBundle(guiceBundle);
+	}
+```
+
 Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
 
 Enjoy!

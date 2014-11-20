@@ -14,7 +14,6 @@ import com.google.inject.Stage;
  * (https://code.google.com/p/mycila/), - Governator
  * (https://github.com/Netflix/governator)
  */
-public interface InjectorFactory
-{
+public interface InjectorFactory {
     public Injector create(final Stage stage, final List<Module> modules);
 }

@@ -24,8 +24,7 @@ import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
-{
+public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
     final Logger logger = LoggerFactory.getLogger(GuiceBundle.class);
 
@@ -85,6 +84,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass, InjectorFactory injectorFactory) {
         Preconditions.checkNotNull(modules);
         Preconditions.checkArgument(!modules.isEmpty());
+        Preconditions.checkNotNull(stage);
         this.modules = modules;
         this.autoConfig = autoConfig;
         this.configurationClass = configurationClass;
@@ -113,7 +113,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     private void initInjector() {
         try {
-            injector = injectorFactory.create( this.stage, ImmutableList.copyOf( this.modules ) );
+            injector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
         } catch(Exception ie) {
             logger.error("Exception occurred when creating Guice Injector - exiting", ie);
             System.exit(1);
