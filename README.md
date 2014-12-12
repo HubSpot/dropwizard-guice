@@ -21,31 +21,33 @@ Simply install a new instance of the bundle during your service initialization
 ```java
 public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
 
-	public static void main(String[] args) throws Exception {
-		new HelloWorldApplication().run(args);
-	}
+  private GuiceBundle<HelloWorldConfiguration> guiceBundle;
 
-	@Override
-	public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
+  public static void main(String[] args) throws Exception {
+    new HelloWorldApplication().run(args);
+  }
 
-		GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
-				.addModule(new HelloWorldModule())
-				.setConfigClass(HelloWorldConfiguration.class)
-				.build();
+  @Override
+  public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
 
-		bootstrap.addBundle(guiceBundle);
-	}
+    guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
+      .addModule(new HelloWorldModule())
+      .setConfigClass(HelloWorldConfiguration.class)
+      .build();
 
-    @Override
-    public String getName() {
-        return "hello-world";
-    }
+    bootstrap.addBundle(guiceBundle);
+  }
 
-	@Override
-	public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
-        environment.jersey().register(HelloWorldResource.class);
-        environment.healthChecks().register("Template", TemplateHealthCheck.class);
-	}
+  @Override
+  public String getName() {
+    return "hello-world";
+  }
+
+  @Override
+  public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
+    environment.jersey().register(HelloWorldResource.class);
+    environment.lifecycle().manage(bundle.getInjector().getInstance(TemplateHealthCheck.class));
+  }
 }
 ```
 
@@ -53,32 +55,32 @@ Lastly, you can enable auto configuration via package scanning.
 ```java
 public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
 
-	public static void main(String[] args) throws Exception {
-		new HelloWorldApplication().run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new HelloWorldApplication().run(args);
+  }
 
-	@Override
-	public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
+  @Override
+  public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
 
-		GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
-				.addModule(new HelloWorldModule())
-				.enableAutoConfig(getClass().getPackage().getName())
-				.setConfigClass(HelloWorldConfiguration.class)
-				.build();
+    GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
+      .addModule(new HelloWorldModule())
+      .enableAutoConfig(getClass().getPackage().getName())
+      .setConfigClass(HelloWorldConfiguration.class)
+      .build();
 
-		bootstrap.addBundle(guiceBundle);
-	}
+    bootstrap.addBundle(guiceBundle);
+  }
 
-    @Override
-    public String getName() {
-        return "hello-world";
-    }
+  @Override
+  public String getName() {
+    return "hello-world";
+  }
 
-	@Override
-	public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
-        // now you don't need to add resources, tasks, healthchecks or providers
-        // you must have your health checks inherit from InjectableHealthCheck in order for them to be injected
-	}
+  @Override
+  public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
+    // now you don't need to add resources, tasks, healthchecks or providers
+    // you must have your health checks inherit from InjectableHealthCheck in order for them to be injected
+  }
 }
 ```
 If you are having trouble accessing your Configuration or Environment inside a Guice Module, you could try using a provider.
@@ -86,20 +88,20 @@ If you are having trouble accessing your Configuration or Environment inside a G
 ```java
 public class HelloWorldModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        // anything you'd like to configure
-    }
+  @Override
+  protected void configure() {
+    // anything you'd like to configure
+  }
 
-    @Provides
-    public SomePool providesSomethingThatNeedsConfiguration(HelloWorldConfiguration configuration) {
-        return new SomePool(configuration.getPoolName());
-    }
+  @Provides
+  public SomePool providesSomethingThatNeedsConfiguration(HelloWorldConfiguration configuration) {
+    return new SomePool(configuration.getPoolName());
+  }
 
-    @Provides
-    public SomeManager providesSomenthingThatNeedsEnvironment(Environment env) {
-        return new SomeManager(env.getSomethingFromHere()));
-    }
+  @Provides
+  public SomeManager providesSomenthingThatNeedsEnvironment(Environment env) {
+    return new SomeManager(env.getSomethingFromHere()));
+  }
 }
 ```
 
@@ -107,32 +109,31 @@ You can also replace the default Guice `Injector` by implementing your own `Inje
 to use [Governator](https://github.com/Netflix/governator) you can create the following implementation:
 
 ```java
-public class GovernatorInjectorFactory implements InjectorFactory
-{
-    @Override
-    public Injector create( final Stage stage, final List<Module> modules )
-    {
-        return LifecycleInjector.builder().inStage( stage ).withModules( modules ).build()
-            .createInjector();
-    }
+public class GovernatorInjectorFactory implements InjectorFactory {
+
+  @Override
+  public Injector create( final Stage stage, final List<Module> modules ) {
+    return LifecycleInjector.builder().inStage( stage ).withModules( modules ).build()
+        .createInjector();
+  }
 }
 ```
 
 and then set the InjectorFactory when initializing the GuiceBundle:
 
 ```java
-	@Override
-	public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
+@Override
+public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
 
-		GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
-				.addModule(new HelloWorldModule())
-				.enableAutoConfig(getClass().getPackage().getName())
-				.setConfigClass(HelloWorldConfiguration.class)
-				.setInjectorFactory( new GovernatorInjectorFactory() )
-				.build();
+  GuiceBundle<HelloWorldConfiguration> guiceBundle = GuiceBundle.<HelloWorldConfiguration>newBuilder()
+    .addModule(new HelloWorldModule())
+    .enableAutoConfig(getClass().getPackage().getName())
+    .setConfigClass(HelloWorldConfiguration.class)
+    .setInjectorFactory( new GovernatorInjectorFactory() )
+    .build();
 
-		bootstrap.addBundle(guiceBundle);
-	}
+ bootstrap.addBundle(guiceBundle);
+}
 ```
 
 Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
