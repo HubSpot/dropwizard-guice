@@ -46,7 +46,7 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
   @Override
   public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
     environment.jersey().register(HelloWorldResource.class);
-    environment.lifecycle().manage(bundle.getInjector().getInstance(TemplateHealthCheck.class));
+    environment.lifecycle().manage(guiceBundle.getInjector().getInstance(TemplateHealthCheck.class));
   }
 }
 ```
