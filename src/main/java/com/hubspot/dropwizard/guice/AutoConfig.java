@@ -7,7 +7,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
-import com.sun.jersey.spi.inject.InjectableProvider;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -45,7 +44,6 @@ public class AutoConfig {
 	public void run(Environment environment, Injector injector) {
 		addHealthChecks(environment, injector);
 		addProviders(environment, injector);
-		addInjectableProviders(environment, injector);
 		addResources(environment, injector);
 		addTasks(environment, injector);
 		addManaged(environment, injector);
@@ -80,17 +78,6 @@ public class AutoConfig {
             InjectableHealthCheck instance = injector.getInstance(healthCheck);
             environment.healthChecks().register(instance.getName(), instance);
 			logger.info("Added injectableHealthCheck: {}", healthCheck);
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	private void addInjectableProviders(Environment environment,
-			Injector injector) {
-		Set<Class<? extends InjectableProvider>> injectableProviders = reflections
-				.getSubTypesOf(InjectableProvider.class);
-		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
-			environment.jersey().register(injectableProvider);
-			logger.info("Added injectableProvider: {}", injectableProvider);
 		}
 	}
 

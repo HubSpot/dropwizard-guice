@@ -1,9 +1,14 @@
 package com.hubspot.dropwizard.guice;
 
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.annotation.Nullable;
+import javax.ws.rs.Path;
 
+import com.google.inject.Key;
+import io.dropwizard.jersey.setup.JerseyEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +21,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceFilter;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
@@ -34,7 +38,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private Injector injector;
     private DropwizardEnvironmentModule dropwizardEnvironmentModule;
     private Optional<Class<T>> configurationClass;
-    private GuiceContainer container;
     private Stage stage;
 
     public static class Builder<T extends Configuration> {
@@ -94,14 +97,12 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void initialize(Bootstrap<?> bootstrap) {
-        container = new GuiceContainer();
-        JerseyContainerModule jerseyContainerModule = new JerseyContainerModule(container);
         if (configurationClass.isPresent()) {
             dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
         } else {
             dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
         }
-        modules.add(jerseyContainerModule);
+        modules.add(new JerseyModule());
         modules.add(dropwizardEnvironmentModule);
 
         initInjector();
@@ -122,16 +123,8 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void run(final T configuration, final Environment environment) {
-        container.setResourceConfig(environment.jersey().getResourceConfig());
-        environment.jersey().replace(new Function<ResourceConfig, ServletContainer>() {
-            @Nullable
-            @Override
-            public ServletContainer apply(ResourceConfig resourceConfig) {
-                return container;
-            }
-        });
-        environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
-                .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
+        JerseyUtil.registerGuiceBound(injector, environment.jersey());
+        JerseyUtil.registerGuiceFilter(environment);
         setEnvironment(configuration, environment);
 
         if (autoConfig != null) {
