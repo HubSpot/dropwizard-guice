@@ -13,7 +13,6 @@ import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +29,8 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private final List<Module> modules;
     private final InjectorFactory injectorFactory;
     private Injector injector;
-    private ServiceLocator serviceLocator;
     private DropwizardEnvironmentModule dropwizardEnvironmentModule;
     private Optional<Class<T>> configurationClass;
-    private GuiceContainer container;
     private Stage stage;
 
     public static class Builder<T extends Configuration> {
@@ -118,7 +115,9 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void run(final T configuration, final Environment environment) {
-        container = new GuiceContainer(environment.jersey().getResourceConfig(), injector);
+        setEnvironment(configuration, environment);
+        final GuiceContainer container = injector.getProvider(GuiceContainer.class).get();
+
         environment.jersey().replace(new Function<ResourceConfig, Servlet>() {
             @Nullable
             @Override
@@ -128,7 +127,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         });
         environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
                 .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
-        setEnvironment(configuration, environment);
 
         if (autoConfig != null) {
             autoConfig.run(environment, injector);
@@ -143,9 +141,5 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     public Injector getInjector() {
         return injector;
-    }
-
-    public ServiceLocator getServiceLocator() {
-        return serviceLocator;
     }
 }
