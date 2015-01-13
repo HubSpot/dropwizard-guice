@@ -6,6 +6,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 public class DropwizardEnvironmentModule<T extends Configuration> extends AbstractModule {
 	private static final String ILLEGAL_DROPWIZARD_MODULE_STATE = "The dropwizard environment has not yet been set. This is likely caused by trying to access the dropwizard environment during the bootstrap phase.";
@@ -37,6 +38,11 @@ public class DropwizardEnvironmentModule<T extends Configuration> extends Abstra
 			throw new ProvisionException(ILLEGAL_DROPWIZARD_MODULE_STATE);
 		}
 		return environment;
+	}
+
+	@Provides
+	public ServletContainer servletContainer(Environment environment) {
+		return (ServletContainer) environment.getJerseyServletContainer();
 	}
 
 	private class CustomConfigurationProvider implements Provider<T> {

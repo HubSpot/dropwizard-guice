@@ -1,6 +1,5 @@
 package com.hubspot.dropwizard.guice;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -13,12 +12,13 @@ import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.jersey.servlet.ServletContainer;
+import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
+import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.servlet.Servlet;
 import java.util.List;
 
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
@@ -29,6 +29,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private final List<Module> modules;
     private final InjectorFactory injectorFactory;
     private Injector injector;
+    private ServiceLocator containerServiceLocator;
     private DropwizardEnvironmentModule dropwizardEnvironmentModule;
     private Optional<Class<T>> configurationClass;
     private Stage stage;
@@ -68,13 +69,13 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
         public GuiceBundle<T> build(Stage s) {
-            return new GuiceBundle<T>(s, autoConfig, modules, configurationClass, injectorFactory);
+            return new GuiceBundle<>(s, autoConfig, modules, configurationClass, injectorFactory);
         }
 
     }
 
     public static <T extends Configuration> Builder<T> newBuilder() {
-        return new Builder<T>();
+        return new Builder<>();
     }
 
     private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass, InjectorFactory injectorFactory) {
@@ -90,13 +91,11 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void initialize(Bootstrap<?> bootstrap) {
-//        JerseyContainerModule jerseyContainerModule = new JerseyContainerModule();
         if (configurationClass.isPresent()) {
-            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
+            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<>(configurationClass.get());
         } else {
             dropwizardEnvironmentModule = new DropwizardEnvironmentModule<>(Configuration.class);
         }
-//        modules.add(jerseyContainerModule);
         modules.add(dropwizardEnvironmentModule);
 
         initInjector();
@@ -117,15 +116,9 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void run(final T configuration, final Environment environment) {
-        final GuiceContainer container = injector.getProvider(GuiceContainer.class).get();
-
-        environment.jersey().replace(new Function<ResourceConfig, Servlet>() {
-            @Nullable
-            @Override
-            public Servlet apply(@Nullable ResourceConfig resourceConfig) {
-                return container;
-            }
-        });
+        final ServletContainer container = (ServletContainer) environment.getJerseyServletContainer();
+        containerServiceLocator = container.getApplicationHandler().getServiceLocator();
+        bridgeGuiceInjector(injector, containerServiceLocator);
 
         environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
                 .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
@@ -136,6 +129,12 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
     }
 
+    public void bridgeGuiceInjector(Injector injector, ServiceLocator serviceLocator) {
+        GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
+        GuiceIntoHK2Bridge guiceBridge = serviceLocator.getService(GuiceIntoHK2Bridge.class);
+        guiceBridge.bridgeGuiceInjector(injector);
+    }
+
     @SuppressWarnings("unchecked")
     private void setEnvironment(final T configuration, final Environment environment) {
         dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
@@ -143,5 +142,9 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     public Injector getInjector() {
         return injector;
+    }
+
+    public ServiceLocator getContainerServiceLocator() {
+        return containerServiceLocator;
     }
 }
