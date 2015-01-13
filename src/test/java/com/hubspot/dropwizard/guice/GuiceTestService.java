@@ -5,12 +5,12 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-public class JavaxInjectedService {
+public class GuiceTestService {
 
     private final String host;
 
     @Inject
-    public JavaxInjectedService( @Named("HostName") String host) {
+    public GuiceTestService(@Named("HostName") String host) {
         this.host = host;
     }
 

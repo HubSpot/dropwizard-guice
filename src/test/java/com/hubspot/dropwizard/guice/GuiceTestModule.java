@@ -3,7 +3,7 @@ package com.hubspot.dropwizard.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
-public class GuiceModule extends AbstractModule {
+public class GuiceTestModule extends AbstractModule {
 
     @Override
     protected void configure() {

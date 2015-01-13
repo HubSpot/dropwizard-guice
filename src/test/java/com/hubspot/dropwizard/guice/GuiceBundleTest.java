@@ -3,8 +3,7 @@ package com.hubspot.dropwizard.guice;
 import com.google.inject.Injector;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
-import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+import io.dropwizard.setup.Environment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -20,25 +19,29 @@ public class GuiceBundleTest {
     @Mock
     Bootstrap<Configuration> bootstrap;
 
+    @Mock
+    Configuration configuration;
+
+    @Mock
+    Environment environment;
+
     @Test
-    public void canBridgeGuiceToHK2() throws ServletException {
+    public void canCreateInjector() throws ServletException {
         //given
-        final ServiceLocator hk2Injector = ServiceLocatorUtilities.createAndPopulateServiceLocator();
         final GuiceBundle<io.dropwizard.Configuration> guiceBundle = GuiceBundle.newBuilder()
-                .addModule(new GuiceModule())
+                .addModule(new GuiceTestModule())
                 .enableAutoConfig("com.apmasphere.platform.server.resources")
                 .build();
-        guiceBundle.initialize(bootstrap);
-        final Injector guiceInjector = guiceBundle.getInjector();
 
         //when
-        guiceBundle.bridgeGuiceInjector(guiceInjector, hk2Injector);
-        JavaxInjectedService guiceService = guiceInjector.getProvider(JavaxInjectedService.class).get();
-        JavaxInjectedService hk2Service = hk2Injector.createAndInitialize(JavaxInjectedService.class);
+        guiceBundle.initialize(bootstrap);
 
         //then
-        assertThat(guiceService).isEqualToComparingFieldByField(hk2Service);
-        assertThat(hk2Service.getHost()).isEqualTo("localhost");
+        final Injector injector = guiceBundle.getInjector();
+        assertThat(injector).isNotNull();
+
+        GuiceTestService service = injector.getProvider(GuiceTestService.class).get();
+        assertThat(service.getHost()).isEqualTo("localhost");
     }
 
 }
