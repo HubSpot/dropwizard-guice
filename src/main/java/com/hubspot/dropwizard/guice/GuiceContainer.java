@@ -1,75 +1,50 @@
 package com.hubspot.dropwizard.guice;
 
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.ws.rs.core.Application;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Scope;
 import com.google.inject.Singleton;
-import com.google.inject.servlet.ServletScopes;
-import com.sun.jersey.api.core.DefaultResourceConfig;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.core.spi.component.ComponentScope;
-import com.sun.jersey.spi.container.WebApplication;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
-import com.sun.jersey.spi.container.servlet.WebConfig;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
+import org.glassfish.jersey.servlet.WebServletConfig;
+import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
+import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
+
+import javax.servlet.ServletException;
 
 @Singleton
 public class GuiceContainer extends ServletContainer {
-    
+
     private static final long serialVersionUID = 1931878850157940335L;
 
+    private final Injector injector;
+
+    private ServiceLocator serviceLocator;
+
     @Inject
-    private Injector injector;
-    
-    private WebApplication webapp;
-    
-    private ResourceConfig resourceConfig = new DefaultResourceConfig();
-
-    public class ServletGuiceComponentProviderFactory extends GuiceComponentProviderFactory {
-        public ServletGuiceComponentProviderFactory(ResourceConfig config, Injector injector) {
-            super(config, injector);
-        }
-        
-        @Override
-        public Map<Scope, ComponentScope> createScopeMap() {
-            Map<Scope, ComponentScope> m = super.createScopeMap();
-
-            m.put(ServletScopes.REQUEST, ComponentScope.PerRequest);
-            return m;
-        }
+    public GuiceContainer(Injector injector) {
+        super(injector.getProvider(ResourceConfig.class).get());
+        this.injector = injector;
     }
 
-    public GuiceContainer() {
-    }
-		
-    public GuiceContainer(Application app) {
-      super(app);
-    }
-		
-    public GuiceContainer(Class<? extends Application> app) {
-      super(app);
-    }
-    
-    public void setResourceConfig(ResourceConfig resourceConfig) {
-	    this.resourceConfig = resourceConfig;
-    }
+
+//    public void setResourceConfig(ResourceConfig resourceConfig) {
+//	    this.resourceConfig = resourceConfig;
+//    }
+
+//    protected ResourceConfig getDefaultResourceConfig(Map<String, Object> props, WebConfig webConfig) throws ServletException {
+//    	return resourceConfig;
+//    }
 
     @Override
-    protected ResourceConfig getDefaultResourceConfig(Map<String, Object> props, WebConfig webConfig) throws ServletException {
-    	return resourceConfig;
+    public void init() throws ServletException {
+        super.init(new WebServletConfig(this));
+        bridgeGuiceInjector(injector);
     }
 
-    @Override
-    protected void initiate(ResourceConfig config, WebApplication webapp) {
-        this.webapp = webapp;
-        webapp.initiate(config, new ServletGuiceComponentProviderFactory(config, injector));
-    }
-
-    public WebApplication getWebApplication() {
-        return webapp;
+    private void bridgeGuiceInjector(Injector injector) {
+        this.serviceLocator = super.getApplicationHandler().getServiceLocator();
+        GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
+        GuiceIntoHK2Bridge guiceBridge = serviceLocator.getService(GuiceIntoHK2Bridge.class);
     }
 }

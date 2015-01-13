@@ -1,12 +1,5 @@
 package com.hubspot.dropwizard.guice;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -16,13 +9,17 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceFilter;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
-
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.servlet.Servlet;
+import java.util.List;
 
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
@@ -34,7 +31,6 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private Injector injector;
     private DropwizardEnvironmentModule dropwizardEnvironmentModule;
     private Optional<Class<T>> configurationClass;
-    private GuiceContainer container;
     private Stage stage;
 
     public static class Builder<T extends Configuration> {
@@ -53,7 +49,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
             configurationClass = Optional.of(clazz);
             return this;
         }
-        
+
         public Builder<T> setInjectorFactory(InjectorFactory factory) {
             Preconditions.checkNotNull(factory);
             injectorFactory = factory;
@@ -76,7 +72,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
     }
-    
+
     public static <T extends Configuration> Builder<T> newBuilder() {
         return new Builder<T>();
     }
@@ -94,14 +90,13 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void initialize(Bootstrap<?> bootstrap) {
-        container = new GuiceContainer();
-        JerseyContainerModule jerseyContainerModule = new JerseyContainerModule(container);
+//        JerseyContainerModule jerseyContainerModule = new JerseyContainerModule();
         if (configurationClass.isPresent()) {
             dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
         } else {
-            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
+            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<>(Configuration.class);
         }
-        modules.add(jerseyContainerModule);
+//        modules.add(jerseyContainerModule);
         modules.add(dropwizardEnvironmentModule);
 
         initInjector();
@@ -122,14 +117,16 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void run(final T configuration, final Environment environment) {
-        container.setResourceConfig(environment.jersey().getResourceConfig());
-        environment.jersey().replace(new Function<ResourceConfig, ServletContainer>() {
+        final GuiceContainer container = injector.getProvider(GuiceContainer.class).get();
+
+        environment.jersey().replace(new Function<ResourceConfig, Servlet>() {
             @Nullable
             @Override
-            public ServletContainer apply(ResourceConfig resourceConfig) {
+            public Servlet apply(@Nullable ResourceConfig resourceConfig) {
                 return container;
             }
         });
+
         environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
                 .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
         setEnvironment(configuration, environment);

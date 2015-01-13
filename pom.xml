@@ -18,7 +18,7 @@
 
     <groupId>com.hubspot.dropwizard</groupId>
     <artifactId>dropwizard-guice</artifactId>
-    <version>0.7.3-SNAPSHOT</version>
+    <version>0.8.1-SNAPSHOT</version>
     <name>Dropwizard Guice Support</name>
     <description>Simple library for using Guice DI in a dropwizard service.</description>
     <url>https://github.com/HubSpot/dropwizard-guice</url>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
-            <version>0.7.1</version>
+            <version>0.8.0-rc1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.code.findbugs</groupId>
@@ -82,6 +82,16 @@
                     <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>guice-bridge</artifactId>
+            <version>2.4.0-b07</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
         </dependency>
     </dependencies>
 

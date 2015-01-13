@@ -1,13 +1,12 @@
 package com.hubspot.dropwizard.guice;
 
+import com.google.common.base.Preconditions;
+import com.google.inject.Injector;
 import io.dropwizard.Bundle;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.servlets.tasks.Task;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import com.google.common.base.Preconditions;
-import com.google.inject.Injector;
-import com.sun.jersey.spi.inject.InjectableProvider;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -45,7 +44,7 @@ public class AutoConfig {
 	public void run(Environment environment, Injector injector) {
 		addHealthChecks(environment, injector);
 		addProviders(environment, injector);
-		addInjectableProviders(environment, injector);
+//		addInjectableProviders(environment, injector);
 		addResources(environment, injector);
 		addTasks(environment, injector);
 		addManaged(environment, injector);
@@ -83,16 +82,16 @@ public class AutoConfig {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	private void addInjectableProviders(Environment environment,
-			Injector injector) {
-		Set<Class<? extends InjectableProvider>> injectableProviders = reflections
-				.getSubTypesOf(InjectableProvider.class);
-		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
-			environment.jersey().register(injectableProvider);
-			logger.info("Added injectableProvider: {}", injectableProvider);
-		}
-	}
+//	@SuppressWarnings("rawtypes")
+//	private void addInjectableProviders(Environment environment,
+//			Injector injector) {
+//		Set<Class<? extends InjectableProvider>> injectableProviders = reflections
+//				.getSubTypesOf(InjectableProvider.class);
+//		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
+//			environment.jersey().register(injectableProvider);
+//			logger.info("Added injectableProvider: {}", injectableProvider);
+//		}
+//	}
 
 	private void addProviders(Environment environment, Injector injector) {
 		Set<Class<?>> providerClasses = reflections
