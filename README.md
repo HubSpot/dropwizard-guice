@@ -82,7 +82,8 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
   public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
     // now you don't need to add resources, tasks, healthchecks, providers, bundles or managed
     // you must have your health checks inherit from InjectableHealthCheck in order for them to be injected
-    // as of dropwizard 0.8.0, you must inject a name into each task constructor for AutoConfig. See test class: `InjectedTask`
+    // as of dropwizard 0.8.0, to AutoConfig `Task`, its constructor needs `@Named() String` injection for the task name.
+    // See: `InjectedTask` example in test package
   }
 }
 ```
