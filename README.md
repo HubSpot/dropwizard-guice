@@ -12,7 +12,7 @@ the dropwizard environment upon service start.
         <dependency>
             <groupId>com.hubspot.dropwizard</groupId>
             <artifactId>dropwizard-guice</artifactId>
-            <version>0.7.0.2</version>
+            <version>0.8.1</version>
         </dependency>
     </dependencies>
 ```
@@ -51,6 +51,8 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 }
 ```
 
+### Auto Config
+
 Lastly, you can enable auto configuration via package scanning.
 ```java
 public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
@@ -78,11 +80,15 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 
   @Override
   public void run(HelloWorldConfiguration helloWorldConfiguration, Environment environment) throws Exception {
-    // now you don't need to add resources, tasks, healthchecks or providers
+    // now you don't need to add resources, tasks, healthchecks, providers, bundles or managed
     // you must have your health checks inherit from InjectableHealthCheck in order for them to be injected
+    // as of dropwizard 0.8.0, you must inject a name into each task constructor for AutoConfig. See test class: `InjectedTask`
   }
 }
 ```
+
+### Guice Providers
+
 If you are having trouble accessing your Configuration or Environment inside a Guice Module, you could try using a provider.
 
 ```java
@@ -104,6 +110,7 @@ public class HelloWorldModule extends AbstractModule {
   }
 }
 ```
+### Injector Factory
 
 You can also replace the default Guice `Injector` by implementing your own `InjectorFactory`. For example if you want 
 to use [Governator](https://github.com/Netflix/governator) you can create the following implementation:

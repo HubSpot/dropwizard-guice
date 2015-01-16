@@ -43,9 +43,8 @@ public class AutoConfig {
 
 	public void run(Environment environment, Injector injector) {
 		addHealthChecks(environment, injector);
-		addProviders(environment, injector);
-//		addInjectableProviders(environment, injector);
-		addResources(environment, injector);
+		addProviders(environment);
+		addResources(environment);
 		addTasks(environment, injector);
 		addManaged(environment, injector);
 	}
@@ -82,18 +81,7 @@ public class AutoConfig {
 		}
 	}
 
-//	@SuppressWarnings("rawtypes")
-//	private void addInjectableProviders(Environment environment,
-//			Injector injector) {
-//		Set<Class<? extends InjectableProvider>> injectableProviders = reflections
-//				.getSubTypesOf(InjectableProvider.class);
-//		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
-//			environment.jersey().register(injectableProvider);
-//			logger.info("Added injectableProvider: {}", injectableProvider);
-//		}
-//	}
-
-	private void addProviders(Environment environment, Injector injector) {
+	private void addProviders(Environment environment) {
 		Set<Class<?>> providerClasses = reflections
 				.getTypesAnnotatedWith(Provider.class);
 		for (Class<?> provider : providerClasses) {
@@ -102,7 +90,7 @@ public class AutoConfig {
 		}
 	}
 
-	private void addResources(Environment environment, Injector injector) {
+	private void addResources(Environment environment) {
 		Set<Class<?>> resourceClasses = reflections
 				.getTypesAnnotatedWith(Path.class);
 		for (Class<?> resource : resourceClasses) {

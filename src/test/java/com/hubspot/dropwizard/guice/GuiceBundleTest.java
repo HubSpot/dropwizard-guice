@@ -2,46 +2,58 @@ package com.hubspot.dropwizard.guice;
 
 import com.google.inject.Injector;
 import io.dropwizard.Configuration;
+import io.dropwizard.jackson.Jackson;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GuiceBundleTest {
 
     @Mock
-    Bootstrap<Configuration> bootstrap;
-
-    @Mock
-    Configuration configuration;
-
-    @Mock
     Environment environment;
 
-    @Test
-    public void canCreateInjector() throws ServletException {
+    private GuiceBundle<Configuration> guiceBundle;
+
+    @Before
+    public void setUp() {
         //given
-        final GuiceBundle<io.dropwizard.Configuration> guiceBundle = GuiceBundle.newBuilder()
-                .addModule(new GuiceTestModule())
-                .enableAutoConfig("com.apmasphere.platform.server.resources")
+        environment = new Environment("test env", Jackson.newObjectMapper(), null, null, null);
+        guiceBundle = GuiceBundle.newBuilder()
+                .addModule(new TestModule())
                 .build();
-
-        //when
-        guiceBundle.initialize(bootstrap);
-
-        //then
-        final Injector injector = guiceBundle.getInjector();
-        assertThat(injector).isNotNull();
-
-        GuiceTestService service = injector.getProvider(GuiceTestService.class).get();
-        assertThat(service.getHost()).isEqualTo("localhost");
+        guiceBundle.initialize(mock(Bootstrap.class));
     }
 
+    @Test
+    public void createsInjectorWhenInit() throws ServletException {
+        //then
+        Injector injector = guiceBundle.getInjector();
+        assertThat(injector).isNotNull();
+    }
+
+    @Test
+    public void replacesContainerWhenRun () {
+        //given
+        Servlet originalContainer = environment.getJerseyServletContainer();
+        assertThat(environment.getJerseyServletContainer()).isNotInstanceOf(GuiceContainer.class);
+
+        //when
+        guiceBundle.run(new Configuration(), environment);
+        Servlet replacedContainer = environment.getJerseyServletContainer();
+
+        //then
+        assertThat(replacedContainer).isInstanceOf(GuiceContainer.class);
+        assertThat(replacedContainer).isNotSameAs(originalContainer);
+    }
 }

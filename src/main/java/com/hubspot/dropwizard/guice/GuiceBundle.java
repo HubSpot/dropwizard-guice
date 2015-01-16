@@ -116,7 +116,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     @Override
     public void run(final T configuration, final Environment environment) {
         setEnvironment(configuration, environment);
-        final GuiceContainer container = injector.getProvider(GuiceContainer.class).get();
+        final GuiceContainer container = injector.getInstance(GuiceContainer.class);
 
         environment.jersey().replace(new Function<ResourceConfig, Servlet>() {
             @Nullable

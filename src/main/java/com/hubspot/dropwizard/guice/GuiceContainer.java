@@ -16,7 +16,7 @@ import javax.servlet.ServletException;
 @Singleton
 public class GuiceContainer extends ServletContainer {
 
-    private static final String ILLEGAL_SERVLET_STATE = "Cannot obtain HK2 ServiceLocator before ServletContainer init";
+    private static final String SERVLET_UNINITIALISED = "Cannot obtain HK2 ServiceLocator before ServletContainer init";
     final private Injector injector;
 
     @Inject
@@ -38,9 +38,10 @@ public class GuiceContainer extends ServletContainer {
     }
 
     public ServiceLocator getServiceLocator() {
-        if (super.getApplicationHandler() == null) {
-            throw new ProvisionException(ILLEGAL_SERVLET_STATE);
+        try {
+            return super.getApplicationHandler().getServiceLocator();
+        } catch (NullPointerException e) {
+            throw new ProvisionException(SERVLET_UNINITIALISED, e);
         }
-        return super.getApplicationHandler().getServiceLocator();
     }
 }
