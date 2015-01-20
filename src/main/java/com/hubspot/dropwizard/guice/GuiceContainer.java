@@ -5,7 +5,6 @@ import com.google.inject.ProvisionException;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.glassfish.jersey.servlet.WebServletConfig;
 import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 
@@ -27,7 +26,7 @@ public class GuiceContainer extends ServletContainer {
 
     @Override
     public void init () throws ServletException {
-        super.init(new WebServletConfig(this));
+        super.init();
         bridgeGuiceInjector(injector, getServiceLocator());
     }
 
