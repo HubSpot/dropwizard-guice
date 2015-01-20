@@ -1,4 +1,5 @@
 package com.hubspot.dropwizard.guice;
+
 import io.dropwizard.lifecycle.Managed;
 
 import javax.inject.Singleton;
