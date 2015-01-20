@@ -28,10 +28,10 @@ public class JerseyUtil {
                 if (type instanceof Class) {
                     Class<?> c = (Class) type;
                     if (isProviderClass(c)) {
-                        logger.info("Registering {0} as a provider class", c.getName());
+                        logger.info("Registering {} as a provider class", c.getName());
                         environment.register(c);
                     } else if (isRootResourceClass(c)) {
-                        logger.info("Registering {0} as a root resource class", c.getName());
+                        logger.info("Registering {} as a root resource class", c.getName());
                         environment.register(c);
                     }
 
