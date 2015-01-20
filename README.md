@@ -91,8 +91,8 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 ### Just-In-Time Bindings
 
 HK2 Guice Bridge does not pick up [just-in-time](https://github.com/google/guice/wiki/JustInTimeBindings) bindings
-(ie any objects that are not configured or provided by the Module). You can either convert your JIT binding to be
-explicit in your Module or use `bindConstant` on a param that's needed by the JIT object:
+(ie any objects that are not configured or provided by the Module). You can easily convert your JIT binding to be
+explicit in your Module by using `bind()`:
 
 ```java
 public class HelloWorldModule extends AbstractModule {
@@ -100,11 +100,10 @@ public class HelloWorldModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(jitObject1.class)
-    bindConstant().annotatedWith(Names.named("JitBinding")).to("ExplicitBinding");
   }
 ```
 
-See test class: `TestModule` for examples of the above. Alternatively you can also use a Provider (see below):
+There also many other ways to configure explicit bindings, including using a Provider (see below):
 
 ### Guice Providers
 
