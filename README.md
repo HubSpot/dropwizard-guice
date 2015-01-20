@@ -88,6 +88,24 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 }
 ```
 
+### Just-In-Time Bindings
+
+HK2 Guice Bridge does not pick up [just-in-time](https://github.com/google/guice/wiki/JustInTimeBindings) bindings
+(ie any objects that are not configured or provided by the Module). You can either convert your JIT binding to be
+explicit in your Module or use `bindConstant` on a param that's needed by the JIT object:
+
+```java
+public class HelloWorldModule extends AbstractModule {
+
+  @Override
+  protected void configure() {
+    bind(jitObject1.class)
+    bindConstant().annotatedWith(Names.named("JitBinding")).to("ExplicitBinding");
+  }
+```
+
+See test class: `TestModule` for examples of the above. Alternatively you can also use a Provider (see below):
+
 ### Guice Providers
 
 If you are having trouble accessing your Configuration or Environment inside a Guice Module, you could try using a provider.
@@ -97,7 +115,7 @@ public class HelloWorldModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // anything you'd like to configure
+    // anything you'd like to configure, such as explicit bindings
   }
 
   @Provides
@@ -143,6 +161,10 @@ public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
  bootstrap.addBundle(guiceBundle);
 }
 ```
+
+*NOTE:* Dropwizard-Guice has been tested with Governator version 1.2.20. If you use the latest 1.3.x Governator release
+ you may encounter errors.
+
 
 Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
 

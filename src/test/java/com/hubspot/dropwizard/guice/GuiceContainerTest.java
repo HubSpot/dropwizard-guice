@@ -1,10 +1,11 @@
 package com.hubspot.dropwizard.guice;
 
-import com.google.inject.*;
-import com.google.inject.name.Names;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.ProvisionException;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.Jackson;
-import io.dropwizard.jersey.DropwizardResourceConfig;
 import io.dropwizard.setup.Environment;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.junit.Before;
@@ -42,13 +43,7 @@ public class GuiceContainerTest {
         Environment environment = new Environment("test env", Jackson.newObjectMapper(), null, null, null);
         DropwizardEnvironmentModule<Configuration> dwModule = new DropwizardEnvironmentModule<>(Configuration.class);
         dwModule.setEnvironmentData(new Configuration(), environment);
-        injector = Guice.createInjector(dwModule,
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bindConstant().annotatedWith(Names.named("HostName")).to("localhost");
-                    }
-                });
+        injector = Guice.createInjector(dwModule, new TestModule());
         injector.injectMembers(this);
 
         when(servletConfig.getServletContext()).thenReturn(servletContext);
@@ -85,19 +80,38 @@ public class GuiceContainerTest {
     }
 
     @Test
-    public void bridgeGuiceToServiceLocator() throws ServletException {
+    public void explicitGuiceBindingsAreBridgedToHk2() throws ServletException {
         //given
-        GuiceContainer container = new GuiceContainer(new DropwizardResourceConfig(), injector);
-        SimpleService guiceService = injector.getInstance(SimpleService.class);
+        InjectedTask guiceTask = injector.getInstance(InjectedTask.class);
+        ExplicitBindingService guiceService = injector.getInstance(ExplicitBindingService.class);
 
-        // when
-        container.init(servletConfig);
+        // when then
+        guiceContainer.init(servletConfig);
+        ServiceLocator serviceLocator = guiceContainer.getServiceLocator();
+        assertThat(serviceLocator.getService(InjectedTask.class)).isNotNull();
+        assertThat(serviceLocator.getService(ExplicitBindingService.class)).isNotNull();
 
-        ServiceLocator serviceLocator = container.getServiceLocator();
-        SimpleService hk2Service = serviceLocator.createAndInitialize(SimpleService.class);
-
-        //then
+        // when then
+        InjectedTask hk2Task = serviceLocator.createAndInitialize(InjectedTask.class);
+        ExplicitBindingService hk2Service = serviceLocator.createAndInitialize(ExplicitBindingService.class);
+        assertThat(guiceTask).isEqualToComparingFieldByField(hk2Task);
+        assertThat(hk2Task.getName()).isEqualTo("test task");
         assertThat(guiceService).isEqualToComparingFieldByField(hk2Service);
-        assertThat(hk2Service.getHost()).isEqualTo("localhost");
     }
+
+    @Test
+    public void jitGuiceBindingsAreNotBridgedToHk2() throws ServletException {
+        // when
+        guiceContainer.init(servletConfig);
+        ServiceLocator serviceLocator = guiceContainer.getServiceLocator();
+
+        // then
+        assertThat(serviceLocator.getService(GuiceContainer.class)).isNull();
+        assertThat(serviceLocator.getService(InjectedBundle.class)).isNull();
+        assertThat(serviceLocator.getService(InjectedHealthCheck.class)).isNull();
+        assertThat(serviceLocator.getService(InjectedManaged.class)).isNull();
+        assertThat(serviceLocator.getService(InjectedProvider.class)).isNull();
+        assertThat(serviceLocator.getService(InjectedResource.class)).isNull();
+    }
+
 }

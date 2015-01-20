@@ -6,7 +6,7 @@ import com.google.inject.name.Names;
 public class TestModule extends AbstractModule {
     @Override
     protected void configure() {
-        bindConstant().annotatedWith(Names.named("HostName")).to("localhost");
+        bind(ExplicitBindingService.class);
         bindConstant().annotatedWith(Names.named("TestTaskName")).to("test task");
     }
 }
