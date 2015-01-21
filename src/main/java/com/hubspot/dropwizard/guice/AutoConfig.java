@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 import java.util.Set;
 
@@ -47,6 +48,7 @@ public class AutoConfig {
 		addResources(environment, injector);
 		addTasks(environment, injector);
 		addManaged(environment, injector);
+		addParamConverterProviders(environment);
 	}
 
 	public void initialize(Bootstrap<?> bootstrap, Injector injector) {
@@ -105,6 +107,15 @@ public class AutoConfig {
 		for (Class<? extends Bundle> bundle : bundleClasses) {
 			bootstrap.addBundle(injector.getInstance(bundle));
 			logger.info("Added bundle class {} during bootstrap", bundle);
+		}
+	}
+
+	private void addParamConverterProviders(Environment environment) {
+		Set<Class<? extends ParamConverterProvider>> providerClasses = reflections
+			    .getSubTypesOf(ParamConverterProvider.class);
+		for (Class<?> provider : providerClasses) {
+			environment.jersey().register(provider);
+			logger.info("Added ParamConverterProvider class: {}", provider);
 		}
 	}
 }
