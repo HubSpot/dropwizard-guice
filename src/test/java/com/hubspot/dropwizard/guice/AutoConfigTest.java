@@ -2,6 +2,9 @@ package com.hubspot.dropwizard.guice;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.hubspot.dropwizard.guice.AutoConfig;
+import com.hubspot.dropwizard.guice.TestModule;
+import com.hubspot.dropwizard.guice.objects.*;
 import io.dropwizard.Bundle;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.lifecycle.Managed;

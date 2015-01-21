@@ -1,4 +1,6 @@
-package com.hubspot.dropwizard.guice;
+package com.hubspot.dropwizard.guice.objects;
+
+import com.hubspot.dropwizard.guice.InjectableHealthCheck;
 
 public class InjectedHealthCheck extends InjectableHealthCheck {
     @Override

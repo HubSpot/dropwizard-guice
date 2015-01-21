@@ -1,4 +1,4 @@
-package com.hubspot.dropwizard.guice;
+package com.hubspot.dropwizard.guice.objects;
 
 public class ExplicitBindingService {
 

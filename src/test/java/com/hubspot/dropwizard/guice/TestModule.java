@@ -2,6 +2,7 @@ package com.hubspot.dropwizard.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
+import com.hubspot.dropwizard.guice.objects.ExplicitBindingService;
 
 public class TestModule extends AbstractModule {
     @Override
