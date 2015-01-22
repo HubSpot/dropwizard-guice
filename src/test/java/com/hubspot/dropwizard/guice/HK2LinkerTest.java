@@ -14,14 +14,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HK2LinkerTest {
 
-    final Injector injector = Guice.createInjector(new TestModule());
-    final ServiceLocator serviceLocator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
+    final static Injector injector = Guice.createInjector(new TestModule());
+    final static ServiceLocator serviceLocator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
+    final static HK2Linker linker = new HK2Linker(injector, serviceLocator);
 
     @Test
     public void explicitGuiceBindingsAreBridgedToHk2() throws ServletException {
-        // given
-        final HK2Linker linker = new HK2Linker(injector, serviceLocator);
-
         // when
         ExplicitResource resource = serviceLocator.createAndInitialize(ExplicitResource.class);
 
@@ -32,10 +30,6 @@ public class HK2LinkerTest {
 
     @Test
     public void jitGuiceBindingsAreBridgedToHk2() throws ServletException {
-
-        //given
-        final HK2Linker linker = new HK2Linker(injector, serviceLocator);
-
         // when
         JitResource resource = serviceLocator.createAndInitialize(JitResource.class);
 
