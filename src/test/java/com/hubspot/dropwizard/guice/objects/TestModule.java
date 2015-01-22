@@ -1,4 +1,4 @@
-package com.hubspot.dropwizard.guice;
+package com.hubspot.dropwizard.guice.objects;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
