@@ -2,8 +2,6 @@ package com.hubspot.dropwizard.guice;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.hubspot.dropwizard.guice.AutoConfig;
-import com.hubspot.dropwizard.guice.TestModule;
 import com.hubspot.dropwizard.guice.objects.*;
 import io.dropwizard.Bundle;
 import io.dropwizard.jackson.Jackson;
@@ -44,7 +42,7 @@ public class AutoConfigTest {
     public void addBundlesDuringBootStrap() {
         //given
         final Bootstrap bootstrap = mock(Bootstrap.class);
-        Bundle singletonBundle = injector.getInstance(InjectedBundle.class);
+        Bundle singletonBundle = injector.getInstance(EmptyBundle.class);
 
         //when
         autoConfig.initialize(bootstrap, injector);
@@ -59,17 +57,17 @@ public class AutoConfigTest {
 
         // then
         SortedSet<String> healthChecks = environment.healthChecks().getNames();
-        assertThat(healthChecks).contains(new InjectedHealthCheck().getName());
+        assertThat(healthChecks).contains(new NamedHealthCheck().getName());
     }
 
     @Test
-    public void shouldAddProviders() {
+    public void addProviders() {
         // when
         autoConfig.run(environment, injector);
 
         //then
         Set<Class<?>> components = environment.jersey().getResourceConfig().getClasses();
-        assertThat(components).containsOnlyOnce(InjectedProvider.class);
+        assertThat(components).containsOnlyOnce(WSProvider.class);
     }
 
     @Test
@@ -79,27 +77,28 @@ public class AutoConfigTest {
 
         //then
         Set<Class<?>> components = environment.jersey().getResourceConfig().getClasses();
-        assertThat(components).containsOnlyOnce(InjectedResource.class);
+        assertThat(components).containsOnlyOnce(ExplicitResource.class);
     }
 
     @Test
-    public void addInjectableTasks() throws Exception {
+    public void addTasks() throws Exception {
         //given
-        Task task = injector.getInstance(InjectedTask.class);
         when(environment.admin()).thenReturn(mock(AdminEnvironment.class));
 
         //when
         autoConfig.run(environment, injector);
 
         //then
+        Task task = injector.getInstance(NamedTask.class);
+        assertThat(task.getName()).isEqualTo("test task");
         verify(environment.admin()).addTask(task);
 
     }
 
     @Test
-    public void shouldAddManaged() {
+    public void addManaged() {
         //given
-        Managed managed = injector.getInstance(InjectedManaged.class);
+        Managed managed = injector.getInstance(EmptyManaged.class);
         when(environment.lifecycle()).thenReturn(mock(LifecycleEnvironment.class));
 
         //when
