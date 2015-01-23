@@ -90,7 +90,7 @@ public class AutoConfigTest {
         autoConfig.run(environment, injector);
 
         //then
-        Task task = injector.getInstance(NamedTask.class);
+        Task task = injector.getInstance(InjectedTask.class);
         assertThat(task.getName()).isEqualTo("test task");
         verify(environment.admin()).addTask(task);
 

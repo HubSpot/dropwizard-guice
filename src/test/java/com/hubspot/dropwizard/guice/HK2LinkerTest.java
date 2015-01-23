@@ -6,7 +6,6 @@ import com.hubspot.dropwizard.guice.objects.ExplicitResource;
 import com.hubspot.dropwizard.guice.objects.JitResource;
 import com.hubspot.dropwizard.guice.objects.TestModule;
 import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
@@ -15,9 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HK2LinkerTest {
 
-    final static Injector injector = Guice.createInjector(new TestModule());
-    final static ServiceLocator serviceLocator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
-    final static HK2Linker linker = new HK2Linker(injector, serviceLocator);
+    final Injector injector = Guice.createInjector(new JerseyModule(), new TestModule());
+    final ServiceLocator serviceLocator = injector.getInstance(ServiceLocator.class);
 
     @Test
     public void explicitGuiceBindingsAreBridgedToHk2() throws ServletException {
