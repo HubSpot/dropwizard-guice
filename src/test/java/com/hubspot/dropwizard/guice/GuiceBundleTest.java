@@ -1,10 +1,12 @@
 package com.hubspot.dropwizard.guice;
 
 import com.google.inject.Injector;
+import com.hubspot.dropwizard.guice.objects.*;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.glassfish.hk2.api.ServiceLocator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +33,9 @@ public class GuiceBundleTest {
         guiceBundle = GuiceBundle.newBuilder()
                 .addModule(new TestModule())
                 .build();
-        guiceBundle.initialize(mock(Bootstrap.class));
+        Bootstrap bootstrap = mock(Bootstrap.class);
+        guiceBundle.initialize(bootstrap);
+        guiceBundle.run(new Configuration(), environment);
     }
 
     @Test
@@ -41,4 +45,9 @@ public class GuiceBundleTest {
         assertThat(injector).isNotNull();
     }
 
+    @Test
+    public void serviceLocatorIsAvaliable () throws ServletException {
+        ServiceLocator serviceLocator = guiceBundle.getInjector().getInstance(ServiceLocator.class);
+        assertThat(serviceLocator).isNotNull();
+    }
 }
