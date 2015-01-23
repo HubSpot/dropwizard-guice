@@ -23,7 +23,7 @@ public class InjectedResourcesTest {
     @Test
     public void shouldGetMessage() {
         // when
-        String message = resources.client().target("/persons").request().get(String.class);
+        String message = resources.client().target("/explicit/message").request().get(String.class);
 
         // then
         assertThat(message).isEqualTo("hello world");
