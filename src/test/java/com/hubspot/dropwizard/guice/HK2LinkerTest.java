@@ -4,7 +4,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hubspot.dropwizard.guice.objects.ExplicitResource;
 import com.hubspot.dropwizard.guice.objects.JitResource;
-import com.hubspot.dropwizard.guice.objects.TestModule;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.junit.Test;
 

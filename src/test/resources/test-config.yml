@@ -1,0 +1,17 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 9999
+
+# Logging settings.
+logging:
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+  loggers:
+    com.apmasphere.platform: DEBUG
+    org.hibernate.SQL: DEBUG
+  appenders:
+    - type: console
