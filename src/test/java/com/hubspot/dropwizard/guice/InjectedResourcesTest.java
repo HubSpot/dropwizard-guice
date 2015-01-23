@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * this test is created to address to Null Pointer Exceptions in JerseyTest.teardown() related to ServiceLocator
  * See: https://github.com/dropwizard/dropwizard/issues/828 and http://permalink.gmane.org/gmane.comp.java.dropwizard.devel/376
  */
-public class ServiceLocatorIntegrationTest  {
+public class InjectedResourcesTest {
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
