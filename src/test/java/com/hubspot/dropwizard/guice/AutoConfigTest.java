@@ -42,7 +42,7 @@ public class AutoConfigTest {
     public void addBundlesDuringBootStrap() {
         //given
         final Bootstrap bootstrap = mock(Bootstrap.class);
-        Bundle singletonBundle = injector.getInstance(EmptyBundle.class);
+        Bundle singletonBundle = injector.getInstance(InjectedBundle.class);
 
         //when
         autoConfig.initialize(bootstrap, injector);
@@ -57,7 +57,7 @@ public class AutoConfigTest {
 
         // then
         SortedSet<String> healthChecks = environment.healthChecks().getNames();
-        assertThat(healthChecks).contains(new NamedHealthCheck().getName());
+        assertThat(healthChecks).contains(new InjectedHealthCheck().getName());
     }
 
     @Test
@@ -67,11 +67,11 @@ public class AutoConfigTest {
 
         //then
         Set<Class<?>> components = environment.jersey().getResourceConfig().getClasses();
-        assertThat(components).containsOnlyOnce(WSProvider.class);
+        assertThat(components).containsOnlyOnce(InjectedProvider.class);
     }
 
     @Test
-    public void shouldAddResources() {
+    public void addResources() {
         //when
         autoConfig.run(environment, injector);
 
@@ -89,7 +89,7 @@ public class AutoConfigTest {
         autoConfig.run(environment, injector);
 
         //then
-        Task task = injector.getInstance(NamedTask.class);
+        Task task = injector.getInstance(InjectedTask.class);
         assertThat(task.getName()).isEqualTo("test task");
         verify(environment.admin()).addTask(task);
 
@@ -98,7 +98,7 @@ public class AutoConfigTest {
     @Test
     public void addManaged() {
         //given
-        Managed managed = injector.getInstance(EmptyManaged.class);
+        Managed managed = injector.getInstance(InjectedManaged.class);
         when(environment.lifecycle()).thenReturn(mock(LifecycleEnvironment.class));
 
         //when
