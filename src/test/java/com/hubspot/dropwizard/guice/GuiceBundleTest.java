@@ -1,6 +1,7 @@
 package com.hubspot.dropwizard.guice;
 
 import com.google.inject.Injector;
+import com.hubspot.dropwizard.guice.objects.*;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.setup.Bootstrap;

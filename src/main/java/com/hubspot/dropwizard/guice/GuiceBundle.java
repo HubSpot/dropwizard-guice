@@ -63,13 +63,13 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
         public GuiceBundle<T> build(Stage s) {
-            return new GuiceBundle<>(s, autoConfig, modules, configurationClass, injectorFactory);
+            return new GuiceBundle<T>(s, autoConfig, modules, configurationClass, injectorFactory);
         }
 
     }
     
     public static <T extends Configuration> Builder<T> newBuilder() {
-        return new Builder<>();
+        return new Builder<T>();
     }
 
     private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass, InjectorFactory injectorFactory) {
@@ -86,9 +86,9 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     @Override
     public void initialize(Bootstrap<?> bootstrap) {
         if (configurationClass.isPresent()) {
-            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<>(configurationClass.get());
+            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
         } else {
-            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<>(Configuration.class);
+            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
         }
         modules.add(new JerseyModule());
         modules.add(dropwizardEnvironmentModule);
