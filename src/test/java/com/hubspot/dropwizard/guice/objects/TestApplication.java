@@ -1,5 +1,6 @@
-package com.hubspot.dropwizard.guice;
+package com.hubspot.dropwizard.guice.objects;
 
+import com.hubspot.dropwizard.guice.GuiceBundle;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
