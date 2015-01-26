@@ -28,10 +28,4 @@ public class InjectedResourcesTest {
         // then
         assertThat(message).isEqualTo("hello world");
     }
-
-    @After
-    public void tearDown() throws Exception {
-        resources.getJerseyTest().tearDown();
-    }
-
 }
