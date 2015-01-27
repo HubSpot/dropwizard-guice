@@ -5,6 +5,7 @@ import com.google.inject.Key;
 import com.google.inject.servlet.GuiceFilter;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Environment;
+import org.glassfish.jersey.server.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +32,14 @@ public class JerseyUtil {
                         logger.info("Registering {} as a provider class", c.getName());
                         environment.register(c);
                     } else if (isRootResourceClass(c)) {
-                        logger.info("Registering {} as a root resource class", c.getName());
-                        environment.register(c);
+                        // Jersey rejects resources that it doesn't think are acceptable
+                        // Including abstract classes and interfaces, even if there is a valid Guice binding.
+                        if(Resource.isAcceptable(c)) {
+                            logger.info("Registering {} as a root resource class", c.getName());
+                            environment.register(c);
+                        } else {
+                            logger.warn("Class {} was not registered as a resource. Bind a concrete implementation instead.", c.getName());
+                        }
                     }
 
                 }
