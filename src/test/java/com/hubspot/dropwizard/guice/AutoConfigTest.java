@@ -81,6 +81,16 @@ public class AutoConfigTest {
     }
 
     @Test
+    public void interfaceResourcesNotAdded() {
+        //when
+        autoConfig.run(environment, injector);
+
+        //then
+        Set<Class<?>> components = environment.jersey().getResourceConfig().getClasses();
+        assertThat(components).doesNotContain(ResourceInterface.class);
+    }
+
+    @Test
     public void addTasks() throws Exception {
         //given
         when(environment.admin()).thenReturn(mock(AdminEnvironment.class));
