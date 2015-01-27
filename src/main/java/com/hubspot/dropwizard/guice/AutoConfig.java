@@ -7,6 +7,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
+import org.glassfish.jersey.server.model.Resource;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -96,8 +97,10 @@ public class AutoConfig {
 		Set<Class<?>> resourceClasses = reflections
 				.getTypesAnnotatedWith(Path.class);
 		for (Class<?> resource : resourceClasses) {
-			environment.jersey().register(resource);
-			logger.info("Added resource class: {}", resource);
+			if(Resource.isAcceptable(resource)) {
+				environment.jersey().register(resource);
+				logger.info("Added resource class: {}", resource);
+			}
 		}
 	}
 
