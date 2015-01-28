@@ -2,9 +2,11 @@ package com.hubspot.dropwizard.guice;
 
 import com.google.common.io.Resources;
 import com.hubspot.dropwizard.guice.objects.TestApplication;
+import com.squarespace.jersey2.guice.BootstrapUtils;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -25,6 +27,11 @@ public class InjectedIntegrationTest {
     @BeforeClass
     public static void setUp() {
         client = new JerseyClientBuilder(RULE.getEnvironment()).build("test client");
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        BootstrapUtils.reset();
     }
 
     public static String resourceFilePath(String resourceClassPathLocation) {

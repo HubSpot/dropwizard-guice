@@ -2,7 +2,9 @@ package com.hubspot.dropwizard.guice;
 
 import com.hubspot.dropwizard.guice.objects.ExplicitDAO;
 import com.hubspot.dropwizard.guice.objects.ExplicitResource;
+import com.squarespace.jersey2.guice.BootstrapUtils;
 import io.dropwizard.testing.junit.ResourceTestRule;
+import org.junit.AfterClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -18,6 +20,11 @@ public class InjectedResourcesTest {
     public static final ResourceTestRule resources = ResourceTestRule.builder()
             .addResource(new ExplicitResource(new ExplicitDAO()))
             .build();
+
+    @AfterClass
+    public static void tearDown() {
+        BootstrapUtils.reset();
+    }
 
     @Test
     public void shouldGetExplicitMessage() {
