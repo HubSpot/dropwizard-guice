@@ -8,7 +8,7 @@ import io.dropwizard.setup.Environment;
 
 import static com.hubspot.dropwizard.guice.GuiceBundle.newBuilder;
 
-class TestApplication extends Application<Configuration> {
+public class TestApplication extends Application<Configuration> {
 
     @Override
     public void initialize(final Bootstrap<Configuration> bootstrap) {

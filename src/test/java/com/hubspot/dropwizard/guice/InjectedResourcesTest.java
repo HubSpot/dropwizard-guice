@@ -3,7 +3,6 @@ package com.hubspot.dropwizard.guice;
 import com.hubspot.dropwizard.guice.objects.ExplicitDAO;
 import com.hubspot.dropwizard.guice.objects.ExplicitResource;
 import io.dropwizard.testing.junit.ResourceTestRule;
-import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -21,11 +20,20 @@ public class InjectedResourcesTest {
             .build();
 
     @Test
-    public void shouldGetMessage() {
+    public void shouldGetExplicitMessage() {
         // when
         String message = resources.client().target("/explicit/message").request().get(String.class);
 
         // then
-        assertThat(message).isEqualTo("hello world");
+        assertThat(message).isEqualTo("this DAO was bound explicitly");
+    }
+
+    @Test
+    public void shouldGetJitMessage() {
+        // when
+        String message = resources.client().target("/explicit/message").request().get(String.class);
+
+        // then
+        assertThat(message).isEqualTo("this DAO was bound explicitly");
     }
 }
