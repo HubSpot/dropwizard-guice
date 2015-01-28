@@ -8,7 +8,7 @@ import io.dropwizard.jackson.Jackson;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.hk2.api.ServiceLocator;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +28,8 @@ public class GuiceBundleTest {
 
     private GuiceBundle<Configuration> guiceBundle;
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         BootstrapUtils.reset();
     }
 

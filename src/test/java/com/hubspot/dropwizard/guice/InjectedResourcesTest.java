@@ -21,11 +21,6 @@ public class InjectedResourcesTest {
             .addResource(new ExplicitResource(new ExplicitDAO()))
             .build();
 
-    @AfterClass
-    public static void tearDown() {
-        BootstrapUtils.reset();
-    }
-
     @Test
     public void shouldGetExplicitMessage() {
         // when
