@@ -1,6 +1,7 @@
 package com.hubspot.dropwizard.guice;
 
 import io.dropwizard.Bundle;
+import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.servlets.tasks.Task;
 import io.dropwizard.setup.Bootstrap;
@@ -54,6 +55,7 @@ public class AutoConfig {
 
 	public void initialize(Bootstrap<?> bootstrap, Injector injector) {
 		addBundles(bootstrap, injector);
+		addConfiguredBundles(bootstrap, injector);
 	}
 
 	private void addManaged(Environment environment, Injector injector) {
@@ -110,6 +112,18 @@ public class AutoConfig {
 		for (Class<? extends Bundle> bundle : bundleClasses) {
 			bootstrap.addBundle(injector.getInstance(bundle));
 			logger.info("Added bundle class {} during bootstrap", bundle);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addConfiguredBundles(Bootstrap<?> bootstrap, Injector injector) {
+		Set<Class<? extends ConfiguredBundle>> configuredBundleClasses = reflections
+						.getSubTypesOf(ConfiguredBundle.class);
+		for (Class<? extends ConfiguredBundle> configuredBundle : configuredBundleClasses) {
+			if (configuredBundle != GuiceBundle.class) {
+				bootstrap.addBundle(injector.getInstance(configuredBundle));
+				logger.info("Added configured bundle class {} during bootstrap", configuredBundle);
+			}
 		}
 	}
 
