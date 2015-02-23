@@ -7,23 +7,25 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class DropwizardEnvironmentModule<T extends Configuration> extends AbstractModule {
 	private static final String ILLEGAL_DROPWIZARD_MODULE_STATE = "The dropwizard environment has not yet been set. This is likely caused by trying to access the dropwizard environment during the bootstrap phase.";
 	private T configuration;
 	private Environment environment;
-	private Class<? super T> configurationClass;
+	private Set<Class<? super T>> configurationClasses;
 
 	public DropwizardEnvironmentModule(Class<T> configurationClass) {
-		this.configurationClass = configurationClass;
+		this.configurationClasses = findConfigurationClasses(configurationClass);
 	}
 
 	@Override
 	protected void configure() {
 		Provider<T> provider = new CustomConfigurationProvider();
-		bind(configurationClass).toProvider(provider);
-		if (configurationClass != Configuration.class) {
-			bind(Configuration.class).toProvider(provider);
-		}
+		for (Class<? super T> configurationClass : configurationClasses) {
+      bind(configurationClass).toProvider(provider);
+    }
 	}
 
 	public void setEnvironmentData(T configuration, Environment environment) {
@@ -38,6 +40,19 @@ public class DropwizardEnvironmentModule<T extends Configuration> extends Abstra
 		}
 		return environment;
 	}
+
+  private Set<Class<? super T>> findConfigurationClasses(Class<T> initialClass) {
+    Set<Class<? super T>> classes = new HashSet<>();
+    classes.add(initialClass);
+
+    Class<? super T> currentClass = initialClass;
+    while (currentClass != Configuration.class) {
+      currentClass = currentClass.getSuperclass();
+      classes.add(currentClass);
+    }
+
+    return classes;
+  }
 
 	private class CustomConfigurationProvider implements Provider<T> {
 		@Override
