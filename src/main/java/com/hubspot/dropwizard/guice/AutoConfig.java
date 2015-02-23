@@ -7,7 +7,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
-import com.sun.jersey.spi.inject.InjectableProvider;
+import org.glassfish.jersey.server.model.Resource;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 import java.util.Set;
 
@@ -44,11 +45,11 @@ public class AutoConfig {
 
 	public void run(Environment environment, Injector injector) {
 		addHealthChecks(environment, injector);
-		addProviders(environment, injector);
-		addInjectableProviders(environment, injector);
-		addResources(environment, injector);
+		addProviders(environment);
+		addResources(environment);
 		addTasks(environment, injector);
 		addManaged(environment, injector);
+		addParamConverterProviders(environment);
 	}
 
 	public void initialize(Bootstrap<?> bootstrap, Injector injector) {
@@ -83,18 +84,7 @@ public class AutoConfig {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	private void addInjectableProviders(Environment environment,
-			Injector injector) {
-		Set<Class<? extends InjectableProvider>> injectableProviders = reflections
-				.getSubTypesOf(InjectableProvider.class);
-		for (Class<? extends InjectableProvider> injectableProvider : injectableProviders) {
-			environment.jersey().register(injectableProvider);
-			logger.info("Added injectableProvider: {}", injectableProvider);
-		}
-	}
-
-	private void addProviders(Environment environment, Injector injector) {
+	private void addProviders(Environment environment) {
 		Set<Class<?>> providerClasses = reflections
 				.getTypesAnnotatedWith(Provider.class);
 		for (Class<?> provider : providerClasses) {
@@ -103,12 +93,14 @@ public class AutoConfig {
 		}
 	}
 
-	private void addResources(Environment environment, Injector injector) {
+	private void addResources(Environment environment) {
 		Set<Class<?>> resourceClasses = reflections
 				.getTypesAnnotatedWith(Path.class);
 		for (Class<?> resource : resourceClasses) {
-			environment.jersey().register(resource);
-			logger.info("Added resource class: {}", resource);
+			if(Resource.isAcceptable(resource)) {
+				environment.jersey().register(resource);
+				logger.info("Added resource class: {}", resource);
+			}
 		}
 	}
 
@@ -118,6 +110,15 @@ public class AutoConfig {
 		for (Class<? extends Bundle> bundle : bundleClasses) {
 			bootstrap.addBundle(injector.getInstance(bundle));
 			logger.info("Added bundle class {} during bootstrap", bundle);
+		}
+	}
+
+	private void addParamConverterProviders(Environment environment) {
+		Set<Class<? extends ParamConverterProvider>> providerClasses = reflections
+			    .getSubTypesOf(ParamConverterProvider.class);
+		for (Class<?> provider : providerClasses) {
+			environment.jersey().register(provider);
+			logger.info("Added ParamConverterProvider class: {}", provider);
 		}
 	}
 }
