@@ -46,9 +46,8 @@
     </developers>
 
     <properties>
-        <io.dropwizard.version>0.8.0-rc3</io.dropwizard.version>
+        <io.dropwizard.version>0.8.1</io.dropwizard.version>
     </properties>
-
 
     <dependencies>
         <dependency>
@@ -70,7 +69,7 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>4.0-beta5</version>
+            <version>4.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -81,12 +80,12 @@
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-servlet</artifactId>
-            <version>4.0-beta5</version>
+            <version>4.0</version>
         </dependency>
         <dependency>
             <groupId>com.squarespace.jersey2-guice</groupId>
             <artifactId>jersey2-guice</artifactId>
-            <version>0.5</version>
+            <version>0.10</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.glassfish.jersey.containers</groupId>
