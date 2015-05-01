@@ -1,11 +1,9 @@
 # Dropwizard-Guice
-
 A simple DropWizard extension for integrating Guice via a bundle. It optionally uses classpath 
 scanning courtesy of the Reflections project to discover resources and more to install into 
 the dropwizard environment upon service start.
 
 ## Usage
-
 ```xml
     <dependencies>
         <dependency>
@@ -153,8 +151,15 @@ public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
 }
 ```
 
+## Testing
+As of Dropwizard 0.8.x, when writing Integration Tests using `DropwizardAppRule`, you need to reset
+[jersey2-guice](https://github.com/Squarespace/jersey2-guice) by running:
 
+    BootstrapUtils.reset();
 
+## Examples
 Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
+
+You may also find more updated and comprehensive examples in the [test cases](https://github.com/HubSpot/dropwizard-guice/tree/master/src/test).
 
 Enjoy!
