@@ -17,55 +17,61 @@ import java.lang.reflect.Type;
  */
 public class JerseyUtil {
 
-    final static Logger logger = LoggerFactory.getLogger(JerseyUtil.class);
+  private static final Logger logger = LoggerFactory.getLogger(JerseyUtil.class);
 
-    /**
-     * Registers any Guice-bound providers or root resources.
-     */
-    public static void registerGuiceBound(Injector injector, final JerseyEnvironment environment) {
-        while (injector != null) {
-            for (Key<?> key : injector.getBindings().keySet()) {
-                Type type = key.getTypeLiteral().getType();
-                if (type instanceof Class) {
-                    Class<?> c = (Class) type;
-                    if (isProviderClass(c)) {
-                        logger.info("Registering {} as a provider class", c.getName());
-                        environment.register(c);
-                    } else if (isRootResourceClass(c)) {
-                        // Jersey rejects resources that it doesn't think are acceptable
-                        // Including abstract classes and interfaces, even if there is a valid Guice binding.
-                        if(Resource.isAcceptable(c)) {
-                            logger.info("Registering {} as a root resource class", c.getName());
-                            environment.register(c);
-                        } else {
-                            logger.warn("Class {} was not registered as a resource. Bind a concrete implementation instead.", c.getName());
-                        }
-                    }
-
-                }
+  /**
+   * Registers any Guice-bound providers or root resources.
+   */
+  public static void registerGuiceBound(Injector injector, final JerseyEnvironment environment) {
+    while (injector != null) {
+      for (Key<?> key : injector.getBindings().keySet()) {
+        Type type = key.getTypeLiteral().getType();
+        if (type instanceof Class) {
+          Class<?> c = (Class) type;
+          if (isProviderClass(c)) {
+            logger.info("Registering {} as a provider class", c.getName());
+            environment.register(c);
+          } else if (isRootResourceClass(c)) {
+            // Jersey rejects resources that it doesn't think are acceptable
+            // Including abstract classes and interfaces, even if there is a valid Guice binding.
+            if(Resource.isAcceptable(c)) {
+              logger.info("Registering {} as a root resource class", c.getName());
+              environment.register(c);
+            } else {
+              logger.warn("Class {} was not registered as a resource. Bind a concrete implementation instead.", c.getName());
             }
-            injector = injector.getParent();
+          }
+
         }
+      }
+      injector = injector.getParent();
+    }
+  }
+
+  private static boolean isProviderClass(Class<?> c) {
+    return c != null && c.isAnnotationPresent(javax.ws.rs.ext.Provider.class);
+  }
+
+  private static boolean isRootResourceClass(Class<?> c) {
+    if (c == null) {
+      return false;
     }
 
-    private static boolean isProviderClass(Class<?> c) {
-        return c != null && c.isAnnotationPresent(javax.ws.rs.ext.Provider.class);
+    if (c.isAnnotationPresent(Path.class)) {
+      return true;
     }
 
-    private static boolean isRootResourceClass(Class<?> c) {
-        if (c == null)
-            return false;
-
-        if (c.isAnnotationPresent(Path.class)) return true;
-
-        for (Class i : c.getInterfaces())
-            if (i.isAnnotationPresent(Path.class)) return true;
-
-        return false;
+    for (Class i : c.getInterfaces()) {
+      if (i.isAnnotationPresent(Path.class)) {
+        return true;
+      }
     }
 
-    public static void registerGuiceFilter(Environment environment) {
-        environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
-                   .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
-    }
+    return false;
+  }
+
+  public static void registerGuiceFilter(Environment environment) {
+    environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
+           .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
+  }
 }
