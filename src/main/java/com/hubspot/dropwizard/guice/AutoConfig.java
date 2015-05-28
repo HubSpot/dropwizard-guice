@@ -31,7 +31,7 @@ public class AutoConfig {
 
 	public AutoConfig(String... basePackages) {
 		Preconditions.checkArgument(basePackages.length > 0);
-		
+
 		ConfigurationBuilder cfgBldr = new ConfigurationBuilder();
 		FilterBuilder filterBuilder = new FilterBuilder();
 		for (String basePkg : basePackages) {

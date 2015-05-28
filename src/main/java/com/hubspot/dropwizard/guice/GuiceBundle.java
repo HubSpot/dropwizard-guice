@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -44,7 +45,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
             configurationClass = Optional.of(clazz);
             return this;
         }
-        
+
         public Builder<T> setInjectorFactory(InjectorFactory factory) {
             Preconditions.checkNotNull(factory);
             injectorFactory = factory;
@@ -67,7 +68,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
     }
-    
+
     public static <T extends Configuration> Builder<T> newBuilder() {
         return new Builder<>();
     }
@@ -100,6 +101,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
     }
 
+    @SuppressFBWarnings("DM_EXIT")
     private void initInjector() {
         try {
             injector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
