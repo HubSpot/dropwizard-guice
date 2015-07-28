@@ -2,7 +2,6 @@ package com.hubspot.dropwizard.guice.objects;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import com.hubspot.dropwizard.guice.objects.ExplicitDAO;
 
 public class TestModule extends AbstractModule {
     @Override

@@ -1,5 +1,9 @@
 package com.hubspot.dropwizard.guice;
 
+import com.google.common.base.Optional;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Key;
+import com.google.inject.ProvidedBy;
 import io.dropwizard.Bundle;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.lifecycle.Managed;
@@ -21,13 +25,13 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import java.lang.reflect.Modifier;
 import java.util.Set;
 
 public class AutoConfig {
+  private static final Logger logger = LoggerFactory.getLogger(AutoConfig.class);
 
-  final Logger logger = LoggerFactory.getLogger(AutoConfig.class);
-
-  private Reflections reflections;
+  private final Reflections reflections;
 
   public AutoConfig(String... basePackages) {
     Preconditions.checkArgument(basePackages.length > 0);
@@ -62,8 +66,11 @@ public class AutoConfig {
     Set<Class<? extends Managed>> managedClasses = reflections
         .getSubTypesOf(Managed.class);
     for (Class<? extends Managed> managed : managedClasses) {
-      environment.lifecycle().manage(injector.getInstance(managed));
-      logger.info("Added managed: {}", managed);
+      Optional<? extends Managed> maybeManaged = getFromGuiceIfPossible(injector, managed);
+      if (maybeManaged.isPresent()) {
+        environment.lifecycle().manage(maybeManaged.get());
+        logger.info("Added managed: {}", managed);
+      }
     }
   }
 
@@ -71,8 +78,11 @@ public class AutoConfig {
     Set<Class<? extends Task>> taskClasses = reflections
         .getSubTypesOf(Task.class);
     for (Class<? extends Task> task : taskClasses) {
-      environment.admin().addTask(injector.getInstance(task));
-      logger.info("Added task: {}", task);
+      Optional<? extends Task> maybeTask = getFromGuiceIfPossible(injector, task);
+      if (maybeTask.isPresent()) {
+        environment.admin().addTask(maybeTask.get());
+        logger.info("Added task: {}", task);
+      }
     }
   }
 
@@ -80,9 +90,11 @@ public class AutoConfig {
     Set<Class<? extends InjectableHealthCheck>> healthCheckClasses = reflections
         .getSubTypesOf(InjectableHealthCheck.class);
     for (Class<? extends InjectableHealthCheck> healthCheck : healthCheckClasses) {
-            InjectableHealthCheck instance = injector.getInstance(healthCheck);
-            environment.healthChecks().register(instance.getName(), instance);
-      logger.info("Added injectableHealthCheck: {}", healthCheck);
+      Optional<? extends InjectableHealthCheck> maybeHealthCheck = getFromGuiceIfPossible(injector, healthCheck);
+      if (maybeHealthCheck.isPresent()) {
+        environment.healthChecks().register(maybeHealthCheck.get().getName(), maybeHealthCheck.get());
+        logger.info("Added injectableHealthCheck: {}", healthCheck);
+      }
     }
   }
 
@@ -110,29 +122,57 @@ public class AutoConfig {
     Set<Class<? extends Bundle>> bundleClasses = reflections
         .getSubTypesOf(Bundle.class);
     for (Class<? extends Bundle> bundle : bundleClasses) {
-      bootstrap.addBundle(injector.getInstance(bundle));
-      logger.info("Added bundle class {} during bootstrap", bundle);
+      Optional<? extends Bundle> maybeBundle = getFromGuiceIfPossible(injector, bundle);
+      if (maybeBundle.isPresent()) {
+        bootstrap.addBundle(maybeBundle.get());
+        logger.info("Added bundle class {} during bootstrap", bundle);
+      }
     }
   }
 
   @SuppressWarnings("unchecked")
   private void addConfiguredBundles(Bootstrap<?> bootstrap, Injector injector) {
     Set<Class<? extends ConfiguredBundle>> configuredBundleClasses = reflections
-            .getSubTypesOf(ConfiguredBundle.class);
+        .getSubTypesOf(ConfiguredBundle.class);
     for (Class<? extends ConfiguredBundle> configuredBundle : configuredBundleClasses) {
       if (configuredBundle != GuiceBundle.class) {
-        bootstrap.addBundle(injector.getInstance(configuredBundle));
-        logger.info("Added configured bundle class {} during bootstrap", configuredBundle);
+        Optional<? extends ConfiguredBundle> maybeConfiguredBundle = getFromGuiceIfPossible(injector, configuredBundle);
+        if (maybeConfiguredBundle.isPresent()) {
+          bootstrap.addBundle(maybeConfiguredBundle.get());
+          logger.info("Added configured bundle class {} during bootstrap", configuredBundle);
+        }
       }
     }
   }
 
   private void addParamConverterProviders(Environment environment) {
     Set<Class<? extends ParamConverterProvider>> providerClasses = reflections
-          .getSubTypesOf(ParamConverterProvider.class);
+        .getSubTypesOf(ParamConverterProvider.class);
     for (Class<?> provider : providerClasses) {
       environment.jersey().register(provider);
       logger.info("Added ParamConverterProvider class: {}", provider);
     }
+  }
+
+  private <T> Optional<T> getFromGuiceIfPossible(Injector injector, Class<T> type) {
+    // if it's a concrete class get it from Guice
+    if (concreteClass(type) || hasBinding(injector, type)) {
+      return Optional.of(injector.getInstance(type));
+    } else {
+      logger.info("Not attempting to retrieve abstract class {} from injector", type);
+      return Optional.absent();
+    }
+  }
+
+  private static boolean concreteClass(Class<?> type) {
+    return !type.isInterface() && !Modifier.isAbstract(type.getModifiers());
+  }
+
+  private static boolean hasBinding(Injector injector, Class<?> type) {
+    return injector.getExistingBinding(Key.get(type)) != null || hasBindingAnnotation(type);
+  }
+
+  private static boolean hasBindingAnnotation(Class<?> type) {
+    return type.isAnnotationPresent(ImplementedBy.class) || type.isAnnotationPresent(ProvidedBy.class);
   }
 }
