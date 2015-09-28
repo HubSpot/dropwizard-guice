@@ -11,7 +11,13 @@ public class JerseyModule extends ServletModule {
     @Override
     protected void configureServlets() {
         // The order these operations (including the steps in the linker) are important
-        ServiceLocator locator = BootstrapUtils.newServiceLocator();
+        ServiceLocator locator = new ServiceLocatorDecorator(BootstrapUtils.newServiceLocator()) {
+
+            @Override
+            public void shutdown() {
+                // don't shutdown, see issue #67. Remove once jersey2-guice supports Jersey 2.21
+            }
+        };
         install(new BootstrapModule(locator));
 
         bind(HK2Linker.class).asEagerSingleton();
