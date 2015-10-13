@@ -10,7 +10,7 @@ public abstract class ConfigurationAwareModule<Configuration> implements Module 
   private volatile Configuration configuration = null;
 
   @Override
-  public void configure(Binder binder) {
+  public final void configure(Binder binder) {
     configure(binder, getConfiguration());
   }
 
@@ -24,5 +24,4 @@ public abstract class ConfigurationAwareModule<Configuration> implements Module 
   }
 
   protected abstract void configure(final Binder binder, final Configuration configuration);
-
 }
