@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +112,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
     }
 
+    @SuppressFBWarnings("DM_EXIT")
     private void initInjector() {
         try {
             injector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));

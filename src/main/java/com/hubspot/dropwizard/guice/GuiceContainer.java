@@ -19,17 +19,14 @@ import com.sun.jersey.spi.container.servlet.WebConfig;
 
 @Singleton
 public class GuiceContainer extends ServletContainer {
-    
     private static final long serialVersionUID = 1931878850157940335L;
 
     @Inject
-    private Injector injector;
-    
-    private WebApplication webapp;
-    
-    private ResourceConfig resourceConfig = new DefaultResourceConfig();
+    private transient Injector injector;
+    private transient WebApplication webapp;
+    private transient ResourceConfig resourceConfig = new DefaultResourceConfig();
 
-    public class ServletGuiceComponentProviderFactory extends GuiceComponentProviderFactory {
+    public static class ServletGuiceComponentProviderFactory extends GuiceComponentProviderFactory {
         public ServletGuiceComponentProviderFactory(ResourceConfig config, Injector injector) {
             super(config, injector);
         }

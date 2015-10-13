@@ -1,14 +1,24 @@
 package com.hubspot.dropwizard.guice;
 
-import com.google.inject.*;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.ProvisionException;
+import com.google.inject.Scope;
+import com.google.inject.Scopes;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.core.spi.component.ComponentScope;
-import com.sun.jersey.core.spi.component.ioc.*;
+import com.sun.jersey.core.spi.component.ioc.IoCComponentProvider;
+import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
+import com.sun.jersey.core.spi.component.ioc.IoCInstantiatedComponentProvider;
+import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
+import com.sun.jersey.core.spi.component.ioc.IoCProxiedComponentProvider;
 
 import javax.ws.rs.WebApplicationException;
-import java.lang.reflect.*;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -89,10 +99,9 @@ public class GuiceComponentProviderFactory implements IoCComponentProviderFactor
       if (isGuiceConstructorInjected(clazz)) {
         try {
           // If a binding is possible
-          if (injector.getBinding(key) != null) {
-            LOGGER.log(Level.INFO, "Binding {0} to GuiceInstantiatedComponentProvider", clazz.getName());
-            return new GuiceInstantiatedComponentProvider(injector, clazz);
-          }
+          injector.getBinding(key);
+          LOGGER.log(Level.INFO, "Binding {0} to GuiceInstantiatedComponentProvider", clazz.getName());
+          return new GuiceInstantiatedComponentProvider(injector, clazz);
         } catch (ConfigurationException e) {
           // The class cannot be injected.
           // For example, the constructor might contain parameters that
