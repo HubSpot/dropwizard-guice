@@ -1,5 +1,6 @@
 package com.hubspot.dropwizard.guice;
 
+import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
@@ -18,6 +19,8 @@ import com.sun.jersey.core.spi.component.ioc.IoCProxiedComponentProvider;
 import javax.ws.rs.WebApplicationException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;

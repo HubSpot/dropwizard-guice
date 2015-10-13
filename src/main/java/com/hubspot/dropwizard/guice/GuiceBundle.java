@@ -54,7 +54,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
             configurationClass = Optional.of(clazz);
             return this;
         }
-        
+
         public Builder<T> setInjectorFactory(InjectorFactory factory) {
             Preconditions.checkNotNull(factory);
             injectorFactory = factory;
@@ -77,7 +77,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
     }
-    
+
     public static <T extends Configuration> Builder<T> newBuilder() {
         return new Builder<T>();
     }

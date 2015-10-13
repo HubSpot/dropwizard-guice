@@ -30,7 +30,7 @@ public class GuiceContainer extends ServletContainer {
         public ServletGuiceComponentProviderFactory(ResourceConfig config, Injector injector) {
             super(config, injector);
         }
-        
+
         @Override
         public Map<Scope, ComponentScope> createScopeMap() {
             Map<Scope, ComponentScope> m = super.createScopeMap();
@@ -42,15 +42,15 @@ public class GuiceContainer extends ServletContainer {
 
     public GuiceContainer() {
     }
-		
+
     public GuiceContainer(Application app) {
       super(app);
     }
-		
+
     public GuiceContainer(Class<? extends Application> app) {
       super(app);
     }
-    
+
     public void setResourceConfig(ResourceConfig resourceConfig) {
 	    this.resourceConfig = resourceConfig;
     }
