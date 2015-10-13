@@ -15,6 +15,8 @@ import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import com.sun.jersey.core.spi.component.ioc.IoCInstantiatedComponentProvider;
 import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
 import com.sun.jersey.core.spi.component.ioc.IoCProxiedComponentProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import java.lang.reflect.AnnotatedElement;
@@ -24,8 +26,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The Guice-based {@link com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory}.
@@ -35,9 +35,8 @@ import java.util.logging.Logger;
  * @author Charlie Groves
  */
 public class GuiceComponentProviderFactory implements IoCComponentProviderFactory {
+  private static final Logger LOG = LoggerFactory.getLogger(GuiceComponentProviderFactory.class);
 
-  private static final Logger LOGGER =
-    Logger.getLogger(GuiceComponentProviderFactory.class.getName());
   private final Map<Scope, ComponentScope> scopeMap = createScopeMap();
   private final Injector injector;
 
@@ -70,10 +69,10 @@ public class GuiceComponentProviderFactory implements IoCComponentProviderFactor
         if (type instanceof Class) {
           Class<?> c = (Class) type;
           if (ResourceConfig.isProviderClass(c)) {
-            LOGGER.log(Level.INFO, "Registering {0} as a provider class", c.getName());
+            LOG.info("Registering {0} as a provider class", c.getName());
             config.getClasses().add(c);
           } else if (ResourceConfig.isRootResourceClass(c)) {
-            LOGGER.log(Level.INFO, "Registering {0} as a root resource class", c.getName());
+            LOG.info("Registering {0} as a root resource class", c.getName());
             config.getClasses().add(c);
           }
 
@@ -90,9 +89,7 @@ public class GuiceComponentProviderFactory implements IoCComponentProviderFactor
 
   @Override
   public IoCComponentProvider getComponentProvider(ComponentContext cc, Class<?> clazz) {
-    if (LOGGER.isLoggable(Level.FINE)) {
-      LOGGER.log(Level.FINE, "getComponentProvider({0})", clazz.getName());
-    }
+    LOG.debug("getComponentProvider({0})", clazz.getName());
 
     Key<?> key = Key.get(clazz);
     Injector i = findInjector(key);
@@ -103,20 +100,20 @@ public class GuiceComponentProviderFactory implements IoCComponentProviderFactor
         try {
           // If a binding is possible
           injector.getBinding(key);
-          LOGGER.log(Level.INFO, "Binding {0} to GuiceInstantiatedComponentProvider", clazz.getName());
+          LOG.info("Binding {0} to GuiceInstantiatedComponentProvider", clazz.getName());
           return new GuiceInstantiatedComponentProvider(injector, clazz);
         } catch (ConfigurationException e) {
           // The class cannot be injected.
           // For example, the constructor might contain parameters that
           // cannot be injected
-          LOGGER.log(Level.SEVERE, "Cannot bind " + clazz.getName(), e);
+          LOG.error("Cannot bind " + clazz.getName(), e);
           // Guice should have picked this up. We fail-fast to prevent
           // Jersey from trying to handle injection.
           throw e;
         }
         // If @Inject is declared on field or method
       } else if (isGuiceFieldOrMethodInjected(clazz)) {
-        LOGGER.log(Level.INFO, "Binding {0} to GuiceInjectedComponentProvider", clazz.getName());
+        LOG.info("Binding {0} to GuiceInjectedComponentProvider", clazz.getName());
         return new GuiceInjectedComponentProvider(injector);
       } else {
         return null;
@@ -124,8 +121,8 @@ public class GuiceComponentProviderFactory implements IoCComponentProviderFactor
     }
 
     ComponentScope componentScope = getComponentScope(key, i);
-    LOGGER.log(Level.INFO, "Binding {0} to GuiceManagedComponentProvider with the scope \"{1}\"",
-               new Object[]{clazz.getName(), componentScope});
+    LOG.info("Binding {0} to GuiceManagedComponentProvider with the scope \"{1}\"",
+        new Object[]{clazz.getName(), componentScope});
     return new GuiceManagedComponentProvider(i, componentScope, clazz);
   }
 

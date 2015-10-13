@@ -19,54 +19,54 @@ import com.sun.jersey.spi.container.servlet.WebConfig;
 
 @Singleton
 public class GuiceContainer extends ServletContainer {
-    private static final long serialVersionUID = 1931878850157940335L;
+  private static final long serialVersionUID = 1931878850157940335L;
 
-    @Inject
-    private transient Injector injector;
-    private transient WebApplication webapp;
-    private transient ResourceConfig resourceConfig = new DefaultResourceConfig();
+  @Inject
+  private transient Injector injector;
+  private transient WebApplication webapp;
+  private transient ResourceConfig resourceConfig = new DefaultResourceConfig();
 
-    public static class ServletGuiceComponentProviderFactory extends GuiceComponentProviderFactory {
-        public ServletGuiceComponentProviderFactory(ResourceConfig config, Injector injector) {
-            super(config, injector);
-        }
-
-        @Override
-        public Map<Scope, ComponentScope> createScopeMap() {
-            Map<Scope, ComponentScope> m = super.createScopeMap();
-
-            m.put(ServletScopes.REQUEST, ComponentScope.PerRequest);
-            return m;
-        }
-    }
-
-    public GuiceContainer() {
-    }
-
-    public GuiceContainer(Application app) {
-      super(app);
-    }
-
-    public GuiceContainer(Class<? extends Application> app) {
-      super(app);
-    }
-
-    public void setResourceConfig(ResourceConfig resourceConfig) {
-	    this.resourceConfig = resourceConfig;
+  public static class ServletGuiceComponentProviderFactory extends GuiceComponentProviderFactory {
+    public ServletGuiceComponentProviderFactory(ResourceConfig config, Injector injector) {
+      super(config, injector);
     }
 
     @Override
-    protected ResourceConfig getDefaultResourceConfig(Map<String, Object> props, WebConfig webConfig) throws ServletException {
-    	return resourceConfig;
-    }
+    public Map<Scope, ComponentScope> createScopeMap() {
+      Map<Scope, ComponentScope> m = super.createScopeMap();
 
-    @Override
-    protected void initiate(ResourceConfig config, WebApplication webapp) {
-        this.webapp = webapp;
-        webapp.initiate(config, new ServletGuiceComponentProviderFactory(config, injector));
+      m.put(ServletScopes.REQUEST, ComponentScope.PerRequest);
+      return m;
     }
+  }
 
-    public WebApplication getWebApplication() {
-        return webapp;
-    }
+  public GuiceContainer() {
+  }
+
+  public GuiceContainer(Application app) {
+    super(app);
+  }
+
+  public GuiceContainer(Class<? extends Application> app) {
+    super(app);
+  }
+
+  public void setResourceConfig(ResourceConfig resourceConfig) {
+    this.resourceConfig = resourceConfig;
+  }
+
+  @Override
+  protected ResourceConfig getDefaultResourceConfig(Map<String, Object> props, WebConfig webConfig) throws ServletException {
+    return resourceConfig;
+  }
+
+  @Override
+  protected void initiate(ResourceConfig config, WebApplication webapp) {
+    this.webapp = webapp;
+    webapp.initiate(config, new ServletGuiceComponentProviderFactory(config, injector));
+  }
+
+  public WebApplication getWebApplication() {
+    return webapp;
+  }
 }

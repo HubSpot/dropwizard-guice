@@ -26,127 +26,126 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
+  private static final Logger LOG = LoggerFactory.getLogger(GuiceBundle.class);
 
-    final Logger logger = LoggerFactory.getLogger(GuiceBundle.class);
+  private final AutoConfig autoConfig;
+  private final List<Module> modules;
+  private final InjectorFactory injectorFactory;
+  private Injector injector;
+  private DropwizardEnvironmentModule dropwizardEnvironmentModule;
+  private Optional<Class<T>> configurationClass;
+  private GuiceContainer container;
+  private Stage stage;
 
-    private final AutoConfig autoConfig;
-    private final List<Module> modules;
-    private final InjectorFactory injectorFactory;
-    private Injector injector;
-    private DropwizardEnvironmentModule dropwizardEnvironmentModule;
-    private Optional<Class<T>> configurationClass;
-    private GuiceContainer container;
-    private Stage stage;
+  public static class Builder<T extends Configuration> {
+    private AutoConfig autoConfig;
+    private List<Module> modules = Lists.newArrayList();
+    private Optional<Class<T>> configurationClass = Optional.absent();
+    private InjectorFactory injectorFactory = new InjectorFactoryImpl();
 
-    public static class Builder<T extends Configuration> {
-        private AutoConfig autoConfig;
-        private List<Module> modules = Lists.newArrayList();
-        private Optional<Class<T>> configurationClass = Optional.absent();
-        private InjectorFactory injectorFactory = new InjectorFactoryImpl();
-
-        public Builder<T> addModule(Module module) {
-            Preconditions.checkNotNull(module);
-            modules.add(module);
-            return this;
-        }
-
-        public Builder<T> setConfigClass(Class<T> clazz) {
-            configurationClass = Optional.of(clazz);
-            return this;
-        }
-
-        public Builder<T> setInjectorFactory(InjectorFactory factory) {
-            Preconditions.checkNotNull(factory);
-            injectorFactory = factory;
-            return this;
-        }
-
-        public Builder<T> enableAutoConfig(String... basePackages) {
-            Preconditions.checkNotNull(basePackages.length > 0);
-            Preconditions.checkArgument(autoConfig == null, "autoConfig already enabled!");
-            autoConfig = new AutoConfig(basePackages);
-            return this;
-        }
-
-        public GuiceBundle<T> build() {
-            return build(Stage.PRODUCTION);
-        }
-
-        public GuiceBundle<T> build(Stage s) {
-            return new GuiceBundle<T>(s, autoConfig, modules, configurationClass, injectorFactory);
-        }
-
+    public Builder<T> addModule(Module module) {
+      Preconditions.checkNotNull(module);
+      modules.add(module);
+      return this;
     }
 
-    public static <T extends Configuration> Builder<T> newBuilder() {
-        return new Builder<T>();
+    public Builder<T> setConfigClass(Class<T> clazz) {
+      configurationClass = Optional.of(clazz);
+      return this;
     }
 
-    private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass, InjectorFactory injectorFactory) {
-        Preconditions.checkNotNull(modules);
-        Preconditions.checkArgument(!modules.isEmpty());
-        Preconditions.checkNotNull(stage);
-        this.modules = modules;
-        this.autoConfig = autoConfig;
-        this.configurationClass = configurationClass;
-        this.injectorFactory = injectorFactory;
-        this.stage = stage;
+    public Builder<T> setInjectorFactory(InjectorFactory factory) {
+      Preconditions.checkNotNull(factory);
+      injectorFactory = factory;
+      return this;
     }
 
-    @Override
-    public void initialize(Bootstrap<?> bootstrap) {
-        container = new GuiceContainer();
-        JerseyContainerModule jerseyContainerModule = new JerseyContainerModule(container);
-        if (configurationClass.isPresent()) {
-            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
-        } else {
-            dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
-        }
-        modules.add(jerseyContainerModule);
-        modules.add(dropwizardEnvironmentModule);
-
-        initInjector();
-
-        if (autoConfig != null) {
-            autoConfig.initialize(bootstrap, injector);
-        }
+    public Builder<T> enableAutoConfig(String... basePackages) {
+      Preconditions.checkNotNull(basePackages.length > 0);
+      Preconditions.checkArgument(autoConfig == null, "autoConfig already enabled!");
+      autoConfig = new AutoConfig(basePackages);
+      return this;
     }
 
-    @SuppressFBWarnings("DM_EXIT")
-    private void initInjector() {
-        try {
-            injector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
-        } catch(Exception ie) {
-            logger.error("Exception occurred when creating Guice Injector - exiting", ie);
-            System.exit(1);
-        }
+    public GuiceBundle<T> build() {
+      return build(Stage.PRODUCTION);
     }
 
-    @Override
-    public void run(final T configuration, final Environment environment) {
-        container.setResourceConfig(environment.jersey().getResourceConfig());
-        environment.jersey().replace(new Function<ResourceConfig, ServletContainer>() {
-            @Nullable
-            @Override
-            public ServletContainer apply(ResourceConfig resourceConfig) {
-                return container;
-            }
-        });
-        environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
-                .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
-        setEnvironment(configuration, environment);
-
-        if (autoConfig != null) {
-            autoConfig.run(environment, injector);
-        }
+    public GuiceBundle<T> build(Stage s) {
+      return new GuiceBundle<T>(s, autoConfig, modules, configurationClass, injectorFactory);
     }
 
-    @SuppressWarnings("unchecked")
-    private void setEnvironment(final T configuration, final Environment environment) {
-        dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
-    }
+  }
 
-    public Injector getInjector() {
-        return injector;
+  public static <T extends Configuration> Builder<T> newBuilder() {
+    return new Builder<T>();
+  }
+
+  private GuiceBundle(Stage stage, AutoConfig autoConfig, List<Module> modules, Optional<Class<T>> configurationClass, InjectorFactory injectorFactory) {
+    Preconditions.checkNotNull(modules);
+    Preconditions.checkArgument(!modules.isEmpty());
+    Preconditions.checkNotNull(stage);
+    this.modules = modules;
+    this.autoConfig = autoConfig;
+    this.configurationClass = configurationClass;
+    this.injectorFactory = injectorFactory;
+    this.stage = stage;
+  }
+
+  @Override
+  public void initialize(Bootstrap<?> bootstrap) {
+    container = new GuiceContainer();
+    JerseyContainerModule jerseyContainerModule = new JerseyContainerModule(container);
+    if (configurationClass.isPresent()) {
+      dropwizardEnvironmentModule = new DropwizardEnvironmentModule<T>(configurationClass.get());
+    } else {
+      dropwizardEnvironmentModule = new DropwizardEnvironmentModule<Configuration>(Configuration.class);
     }
+    modules.add(jerseyContainerModule);
+    modules.add(dropwizardEnvironmentModule);
+
+    initInjector();
+
+    if (autoConfig != null) {
+      autoConfig.initialize(bootstrap, injector);
+    }
+  }
+
+  @SuppressFBWarnings("DM_EXIT")
+  private void initInjector() {
+    try {
+      injector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
+    } catch(Exception ie) {
+      LOG.error("Exception occurred when creating Guice Injector - exiting", ie);
+      System.exit(1);
+    }
+  }
+
+  @Override
+  public void run(final T configuration, final Environment environment) {
+    container.setResourceConfig(environment.jersey().getResourceConfig());
+    environment.jersey().replace(new Function<ResourceConfig, ServletContainer>() {
+      @Nullable
+      @Override
+      public ServletContainer apply(ResourceConfig resourceConfig) {
+        return container;
+      }
+    });
+    environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
+        .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
+    setEnvironment(configuration, environment);
+
+    if (autoConfig != null) {
+      autoConfig.run(environment, injector);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void setEnvironment(final T configuration, final Environment environment) {
+    dropwizardEnvironmentModule.setEnvironmentData(configuration, environment);
+  }
+
+  public Injector getInjector() {
+    return injector;
+  }
 }
