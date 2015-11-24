@@ -8,6 +8,8 @@ import javax.inject.Singleton;
 
 @Singleton
 public class InjectedBundle implements Bundle {
+    public static final String MARKER = "BUNDLE RAN";
+
     @Override
     public void initialize(Bootstrap<?> bootstrap) {
 
@@ -15,6 +17,6 @@ public class InjectedBundle implements Bundle {
 
     @Override
     public void run(Environment environment) {
-
+        System.setProperty(MARKER, "true");
     }
 }
