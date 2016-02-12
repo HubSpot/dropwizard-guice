@@ -9,10 +9,12 @@ the dropwizard environment upon service start.
         <dependency>
             <groupId>com.hubspot.dropwizard</groupId>
             <artifactId>dropwizard-guice</artifactId>
-            <version>0.8.X</version>
+            <version>0.8.4.0</version>
         </dependency>
     </dependencies>
 ```
+
+A list of available versions can be found at https://github.com/HubSpot/dropwizard-guice/releases
 
 Simply install a new instance of the bundle during your service initialization
 ```java
