@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 /**
- * Factory to create Guice Injector with supplied Stage and List of Modules.
+ * Factory to create Guice Injector with a list of Modules.
  *
  * Idea behind separating this out is to enable integrating applications to
  * use alternate Guice factories like, - Mycila
