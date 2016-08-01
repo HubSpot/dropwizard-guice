@@ -1,8 +1,9 @@
 package com.hubspot.dropwizard.guice;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import com.hubspot.dropwizard.guice.objects.TestModule;
-import com.squarespace.jersey2.guice.BootstrapUtils;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.setup.Bootstrap;
@@ -30,13 +31,13 @@ public class GuiceBundleTest {
 
     @After
     public void tearDown() {
-        BootstrapUtils.reset();
+        JerseyGuiceUtils.reset();
     }
 
     @Before
     public void setUp() {
         //given
-        environment = new Environment("test env", Jackson.newObjectMapper(), null, null, null);
+        environment = new Environment("test env", Jackson.newObjectMapper(), null, new MetricRegistry(), null);
         guiceBundle = GuiceBundle.newBuilder()
                 .addModule(new TestModule())
                 .build();
