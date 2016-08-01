@@ -9,7 +9,7 @@ the dropwizard environment upon service start.
         <dependency>
             <groupId>com.hubspot.dropwizard</groupId>
             <artifactId>dropwizard-guice</artifactId>
-            <version>0.8.4.0</version>
+            <version>${current.version}</version>
         </dependency>
     </dependencies>
 ```
@@ -157,7 +157,7 @@ public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
 As of Dropwizard 0.8.x, when writing Integration Tests using `DropwizardAppRule`, you need to reset
 [jersey2-guice](https://github.com/Squarespace/jersey2-guice) by running:
 
-    BootstrapUtils.reset();
+    JerseyGuiceUtils.reset();
 
 ## Examples
 Please fork [an example project](https://github.com/eliast/dropwizard-guice-example) if you'd like to get going right away. 
