@@ -1,13 +1,17 @@
 package com.hubspot.dropwizard.guice;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hubspot.dropwizard.guice.objects.ExplicitResource;
 import com.hubspot.dropwizard.guice.objects.JitResource;
 import com.hubspot.dropwizard.guice.objects.TestModule;
-import com.squarespace.jersey2.guice.BootstrapUtils;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
@@ -16,12 +20,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HK2LinkerTest {
 
-    final Injector injector = Guice.createInjector(new JerseyModule(), new TestModule());
+    private static Injector injector;
     final ServiceLocator serviceLocator = injector.getInstance(ServiceLocator.class);
+
+    @BeforeClass
+    public static void setup() {
+
+        final GuiceBundle bundle = new GuiceBundle.Builder().addModule(new TestModule()).build();
+        bundle.initialize(new Bootstrap<Configuration>(new Application<Configuration>() {
+            @Override
+            public void run(Configuration configuration, Environment environment) throws Exception {
+
+            }
+        }));
+        injector = bundle.getInjector();
+
+    }
 
     @AfterClass
     public static void tearDown() {
-        BootstrapUtils.reset();
+        JerseyGuiceUtils.reset();
     }
 
     @Test

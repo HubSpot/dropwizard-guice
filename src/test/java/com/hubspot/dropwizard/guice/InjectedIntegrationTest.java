@@ -3,7 +3,7 @@ package com.hubspot.dropwizard.guice;
 import com.google.common.io.Resources;
 import com.hubspot.dropwizard.guice.objects.InjectedBundle;
 import com.hubspot.dropwizard.guice.objects.TestApplication;
-import com.squarespace.jersey2.guice.BootstrapUtils;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -32,7 +32,7 @@ public class InjectedIntegrationTest {
 
     @AfterClass
     public static void tearDown() {
-        BootstrapUtils.reset();
+        JerseyGuiceUtils.reset();
     }
 
     public static String resourceFilePath(String resourceClassPathLocation) {

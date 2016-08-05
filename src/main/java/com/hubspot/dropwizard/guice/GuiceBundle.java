@@ -7,15 +7,19 @@ import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.servlet.ServletModule;
+import com.squarespace.jersey2.guice.JerseyGuiceModule;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import java.util.List;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.extension.ServiceLocatorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
@@ -24,7 +28,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private final AutoConfig autoConfig;
     private final List<Module> modules;
     private final InjectorFactory injectorFactory;
-    private Injector injector;
+    private Injector baseInjector;
     private DropwizardEnvironmentModule dropwizardEnvironmentModule;
     private Optional<Class<T>> configurationClass;
     private Stage stage;
@@ -91,20 +95,31 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         } else {
             dropwizardEnvironmentModule = new DropwizardEnvironmentModule<>(Configuration.class);
         }
-        modules.add(new JerseyModule());
         modules.add(dropwizardEnvironmentModule);
+        modules.add(new ServletModule());
 
         initInjector();
+        JerseyGuiceUtils.install(new ServiceLocatorGenerator() {
+            @Override
+            public ServiceLocator create(String name, ServiceLocator parent) {
+                if (!name.startsWith("__HK2_Generated_")) {
+                    return null;
+                }
+
+                return baseInjector.createChildInjector(new JerseyGuiceModule(name))
+                        .getInstance(ServiceLocator.class);
+            }
+        });
 
         if (autoConfig != null) {
-            autoConfig.initialize(bootstrap, injector);
+            autoConfig.initialize(bootstrap, baseInjector.createChildInjector(new JerseyGuiceModule(JerseyGuiceUtils.newServiceLocator())));
         }
     }
 
     @SuppressFBWarnings("DM_EXIT")
     private void initInjector() {
         try {
-            injector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
+            baseInjector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
         } catch(Exception ie) {
             logger.error("Exception occurred when creating Guice Injector - exiting", ie);
             System.exit(1);
@@ -113,12 +128,12 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void run(final T configuration, final Environment environment) {
-        JerseyUtil.registerGuiceBound(injector, environment.jersey());
+        JerseyUtil.registerGuiceBound(baseInjector, environment.jersey());
         JerseyUtil.registerGuiceFilter(environment);
         setEnvironment(configuration, environment);
 
         if (autoConfig != null) {
-            autoConfig.run(environment, injector);
+            autoConfig.run(environment, baseInjector);
         }
     }
 
@@ -128,6 +143,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     }
 
     public Injector getInjector() {
-        return injector;
+        Preconditions.checkState(baseInjector != null, "injector is only available after com.hubspot.dropwizard.guice.GuiceBundle.initialize() is called");
+        return baseInjector.createChildInjector(new JerseyGuiceModule(JerseyGuiceUtils.newServiceLocator()));
     }
 }
