@@ -72,6 +72,6 @@ public class JerseyUtil {
 
   public static void registerGuiceFilter(Environment environment) {
     environment.servlets().addFilter("Guice Filter", GuiceFilter.class)
-           .addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
+           .addMappingForUrlPatterns(null, false, "/*");
   }
 }
