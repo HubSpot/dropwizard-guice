@@ -35,6 +35,11 @@
     </properties>
 
     <dependencies>
+        <!-- Put this dep first so the ServiceLoader returns its classes first -->
+        <dependency>
+            <groupId>com.squarespace.jersey2-guice</groupId>
+            <artifactId>jersey2-guice-impl</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>annotations</artifactId>
@@ -82,10 +87,6 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squarespace.jersey2-guice</groupId>
-            <artifactId>jersey2-guice-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
