@@ -57,7 +57,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
 
         public Builder<T> enableAutoConfig(String... basePackages) {
-            Preconditions.checkNotNull(basePackages.length > 0);
+            Preconditions.checkArgument(basePackages.length > 0, "at least one package must be specified for AutoConfig");
             Preconditions.checkArgument(autoConfig == null, "autoConfig already enabled!");
             autoConfig = new AutoConfig(basePackages);
             return this;
