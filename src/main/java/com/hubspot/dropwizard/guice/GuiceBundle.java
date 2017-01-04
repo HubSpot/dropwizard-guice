@@ -45,6 +45,14 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
             return this;
         }
 
+        public Builder<T> addModules(Module... newModules) {
+            Preconditions.checkNotNull(modules);
+            for (Module module : newModules) {
+                addModule(module);
+            }
+            return this;
+        }
+
         public Builder<T> setConfigClass(Class<T> clazz) {
             configurationClass = Optional.of(clazz);
             return this;
