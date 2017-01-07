@@ -45,9 +45,11 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
             return this;
         }
 
-        public Builder<T> addModules(Module... newModules) {
-            Preconditions.checkNotNull(modules);
-            for (Module module : newModules) {
+        public Builder<T> addModules(Module moduleOne, Module moduleTwo,
+                                     Module... moreModules) {
+            addModule(moduleOne);
+            addModule(moduleTwo);
+            for (Module module : moreModules) {
                 addModule(module);
             }
             return this;
