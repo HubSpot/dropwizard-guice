@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.squarespace.jersey2.guice.JerseyGuiceModule;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
@@ -140,6 +141,12 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     public void run(final T configuration, final Environment environment) {
         JerseyUtil.registerGuiceBound(baseInjector, environment.jersey());
         JerseyUtil.registerGuiceFilter(environment);
+        environment.servlets().addServletListeners(new GuiceServletContextListener() {
+            @Override
+            protected Injector getInjector() {
+                return baseInjector;
+            }
+        });
         setEnvironment(configuration, environment);
 
         if (autoConfig != null) {
