@@ -10,7 +10,7 @@
 
     <groupId>com.hubspot.dropwizard</groupId>
     <artifactId>dropwizard-guice</artifactId>
-    <version>1.0.0.3-SNAPSHOT</version>
+    <version>1.0.0.4-SNAPSHOT</version>
     <description>Simple library for using Guice DI in a dropwizard service.</description>
     <url>https://github.com/HubSpot/dropwizard-guice</url>
 
