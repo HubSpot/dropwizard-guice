@@ -2,7 +2,12 @@ package com.hubspot.dropwizard.guice;
 
 import com.hubspot.dropwizard.guice.objects.ExplicitDAO;
 import com.hubspot.dropwizard.guice.objects.ExplicitResource;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+
 import io.dropwizard.testing.junit.ResourceTestRule;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -13,6 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * See: https://github.com/dropwizard/dropwizard/issues/828 and http://permalink.gmane.org/gmane.comp.java.dropwizard.devel/376
  */
 public class InjectedResourcesTest {
+
+    static {
+        JerseyGuiceUtils.reset();
+    }
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
