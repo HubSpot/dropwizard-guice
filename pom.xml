@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.hubspot</groupId>
         <artifactId>basepom</artifactId>
-        <version>15.8</version>
+        <version>15.11</version>
     </parent>
 
     <groupId>com.hubspot.dropwizard</groupId>
     <artifactId>dropwizard-guice</artifactId>
-    <version>1.0.2.1-SNAPSHOT</version>
+    <version>1.0.6.0-SNAPSHOT</version>
     <description>Simple library for using Guice DI in a dropwizard service.</description>
     <url>https://github.com/HubSpot/dropwizard-guice</url>
 
@@ -28,11 +28,6 @@
             <email>elias@hubspot.com</email>
         </developer>
     </developers>
-
-    <properties>
-        <!-- match expectation by artifact: io.dropwizard:dropwizard-testing -->
-        <dep.mockito.version>2.0.54-beta</dep.mockito.version>
-    </properties>
 
     <dependencies>
         <!-- Put this dep first so the ServiceLoader returns its classes first -->
