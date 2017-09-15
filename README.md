@@ -85,7 +85,7 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 ```
 
 Dropwizard `Task` requires a TaskName. Therefore when Auto Configuring a `Task`, you need to inject in the TaskName:
-
+```java
     @Singleton
     public class MyTask extends Task {
 
@@ -99,7 +99,7 @@ Dropwizard `Task` requires a TaskName. Therefore when Auto Configuring a `Task`,
 
         }
     }
-
+```
 And bind the TaskName in your module:
 
     bindConstant().annotatedWith(Names.named("MyTaskName")).to("my awesome task");
