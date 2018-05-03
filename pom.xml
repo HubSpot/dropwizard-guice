@@ -29,6 +29,10 @@
         </developer>
     </developers>
 
+    <properties>
+      <project.build.targetJdk>1.8</project.build.targetJdk>
+    </properties>
+
     <dependencies>
         <!-- Put this dep first so the ServiceLoader returns its classes first -->
         <dependency>
