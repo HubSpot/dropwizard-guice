@@ -14,6 +14,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
+import io.dropwizard.logging.LoggingUtil;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.util.List;
@@ -132,8 +133,19 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         try {
             baseInjector = injectorFactory.create(this.stage,ImmutableList.copyOf(this.modules));
         } catch(Exception ie) {
+            /*
+            Injector creation failed so we don't know what state we're in. Graceful shutdown might not
+            work if the injector created any non-daemon threads before failing. Seems like the safest
+            thing is to System.exit
+             */
             logger.error("Exception occurred when creating Guice Injector - exiting", ie);
-            System.exit(1);
+
+            // attempt to flush any async logging before exiting
+            try {
+                LoggingUtil.getLoggerContext().reset();
+            } finally {
+                System.exit(1);
+            }
         }
     }
 
