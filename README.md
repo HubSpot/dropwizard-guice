@@ -6,7 +6,7 @@ the dropwizard environment upon service start.
 
 ### NOTE:
 
-This library has been largely replaced by [dropwizard-guicier](https://github.com/HubSpot/dropwizard-guicier), so we don't recommend using it for new development.
+This library has been replaced by [dropwizard-guicier](https://github.com/HubSpot/dropwizard-guicier), so we don't recommend using it for new development.
 
 ## Usage
 ```xml
