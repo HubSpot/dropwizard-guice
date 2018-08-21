@@ -1,7 +1,12 @@
 # Dropwizard-Guice
+
 A simple DropWizard extension for integrating Guice via a bundle. It optionally uses classpath 
 scanning courtesy of the Reflections project to discover resources and more to install into 
 the dropwizard environment upon service start.
+
+### NOTE:
+
+This library has been largely replaced by [dropwizard-guicier](https://github.com/HubSpot/dropwizard-guicier), so we don't recommend using it for new development.
 
 ## Usage
 ```xml
